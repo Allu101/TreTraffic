@@ -30,7 +30,7 @@ export default function Map() {
     //const tempLocation = await AppStorage.getValueFor('location');
     //setLocation(tempLocation)
     const intersectionLocations = await getAllIntersectionLocations();
-    setIntersections(intersectionLocations.data);
+    setIntersections(intersectionLocations);
   }
 
   function initLocation() {
