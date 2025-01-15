@@ -2,12 +2,37 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { StyleSheet } from 'react-native';
 import React, { useEffect } from "react";
+import * as Location from 'expo-location';
 //import * as SplashScreen from 'expo-splash-screen';
+import AppStorage from './utils/secure-store.service';
 import Home from './components/Home';
-import Map from './components/Map';
+import Map from './components/MapView';
 
 export default function App() {
   const Tab = createBottomTabNavigator();
+
+  useEffect(() => {
+    fetchGPS();
+  }, []);
+
+  const fetchGPS = async () => {
+    const { status } = await Location.requestForegroundPermissionsAsync();
+
+    if (status === 'granted' && await Location.hasServicesEnabledAsync()) {
+      await Location.watchPositionAsync(
+        {
+          accuracy: Location.Accuracy.BestForNavigation,
+          type: Location.LocationActivityType.AutomotiveNavigation,
+        },
+        async (location) => {
+          await AppStorage.save(
+            'location',
+            `${location.coords.latitude},${location.coords.longitude}`
+          );
+        }
+      );
+    }
+  }
 
   return (
     <NavigationContainer independent={true}>
@@ -21,11 +46,9 @@ export default function App() {
           tabBarLabelStyle: {
             fontSize: 25,
             marginBottom: 15,
-            
           },
           tabBarStyle: {
-            height: 70,
-            
+            height: 65,
           },
           headerTitleStyle: {
             color: '#111'
