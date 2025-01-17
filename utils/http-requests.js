@@ -14,6 +14,19 @@ async function getAllIntersectionLocations() {
   return result;
 }
 
+async function getIntersectionData(intersection_nro) {
+  let result = {};
+  await axios.get(`${BASE_URL}/intersections/intersection/${intersection_nro}`)
+    .then(function (response) {
+      result = response.data
+    })
+    .catch(function (error) {
+      result.error = error;
+    });
+  return result;
+}
+
 export {
 	getAllIntersectionLocations,
+  getIntersectionData,
 };

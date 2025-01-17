@@ -1,7 +1,6 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
-import { StyleSheet } from 'react-native';
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import * as Location from 'expo-location';
 //import * as SplashScreen from 'expo-splash-screen';
 import AppStorage from './utils/secure-store.service';
@@ -9,6 +8,8 @@ import Home from './components/Home';
 import Map from './components/MapView';
 
 export default function App() {
+  const [selectedLightGroups, setSelectedLightGroups] = useState([]);
+
   const Tab = createBottomTabNavigator();
 
   useEffect(() => {
@@ -62,7 +63,7 @@ export default function App() {
       >
         <Tab.Screen
           name={'home'}
-          children={() => <Home />}
+          children={() => <Home selectedLightGroups={selectedLightGroups} />}
           options={{
             title: 'Home',
             tabBarIconStyle: { display: "none" }
@@ -70,7 +71,7 @@ export default function App() {
         />
         <Tab.Screen
           name={'map'}
-          children={() => <Map />}
+          children={() => <Map setSelectedLightGroups={setSelectedLightGroups} />}
           options={{
             title: 'Map',
             tabBarIconStyle: { display: "none" }
@@ -81,12 +82,3 @@ export default function App() {
     </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

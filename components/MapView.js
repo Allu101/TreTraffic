@@ -1,11 +1,10 @@
-import { StyleSheet, Text, View, Dimensions } from 'react-native';
-import React, { useContext, useEffect, useState, useRef } from 'react';
-import { useIsFocused } from '@react-navigation/native';
-import MapView, { PROVIDER_GOOGLE, Callout, Marker } from 'react-native-maps';
+import { StyleSheet, View, Dimensions } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import AppStorage from '../utils/secure-store.service';
 import { getAllIntersectionLocations } from '../utils/http-requests';
 
-export default function Map() {
+export default function Map({ setSelectedLightGroups }) {
   const [location, setLocation] = useState(null);
   const [intersections, setIntersections] = useState([]);
   const [markers, setMarkers] = useState([]);
@@ -49,15 +48,18 @@ export default function Map() {
         }}
         title={intersection.liva_nro}
         description={intersection.paikka}
+        onPress={(e) => {
+          getIntersectionData(intersection.liva_nro)}
+        }
       >
-        <Callout
-          title={true}
-          width={210}
-          onPress={() => {console.log('click')} }
-        ></Callout>
       </Marker>
     ));
     setMarkers(tempMarkers);
+  }
+
+  function getIntersectionData(intersection_nro) {
+    setSelectedLightGroups([...[],
+      intersection_nro]);
   }
 
   return (
