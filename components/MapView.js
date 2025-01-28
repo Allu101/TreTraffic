@@ -1,7 +1,7 @@
 import { StyleSheet, View, Dimensions } from 'react-native';
 import React, { useEffect, useState, useRef } from 'react';
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
-import AppStorage from '../utils/secure-store.service';
+import AppStorage from '../utils/secure-store';
 import { getAllIntersectionLocations } from '../utils/http-requests';
 
 export default function Map({ setSelectedLightGroups }) {
@@ -26,15 +26,15 @@ export default function Map({ setSelectedLightGroups }) {
   }, [intersections]);
 
   const fetchLocations = async () => {
-    //const tempLocation = await AppStorage.getValueFor('location');
-    //setLocation(tempLocation)
+    const tempLocation = await AppStorage.getValueFor('location');
     const intersectionLocations = await getAllIntersectionLocations();
     setIntersections(intersectionLocations);
+    setLocation(tempLocation);
   }
 
   function initLocation() {
-    mapViewRef.current?.animateCamera(
-      { center: initialRegion, zoom: 13 }, { duration: 1000 });
+    mapViewRef.current.animateCamera(
+      { center: initialRegion, zoom: 12 }, { duration: 900 });
   }
 
   function initMarkers() {

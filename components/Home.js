@@ -14,12 +14,6 @@ export default function Home({ selectedLightGroups }) {
 
   useEffect(() => {
     if (selectedLightGroups.length <= 0) return;
-    
-    fetchData();
-  }, [selectedLightGroups]);
-
-  useEffect(() => {
-    if (selectedLightGroups.length <= 0) return;
 
 		startTimer(isFocused);
 		return () => {
@@ -27,12 +21,17 @@ export default function Home({ selectedLightGroups }) {
 		}
 	}, [isFocused]);
 
+  useEffect(() => {
+    if (selectedLightGroups.length <= 0) return;
+    
+    fetchData();
+  }, [selectedLightGroups]);
+
   const startTimer = (isFocused) => {
 		if (isFocused) {
       fetchData();
 			intervalId = setInterval(() => {
 				fetchData();
-        console.log('timer')
 			}, 600);
 		} else {
 			clearInterval(intervalId);
@@ -40,12 +39,15 @@ export default function Home({ selectedLightGroups }) {
 	}
 
   const fetchData = async () => {
-    const intersectionData = await getIntersectionData(selectedLightGroups[0]);
+    let intersectionData = await getIntersectionData(selectedLightGroups[0]);
+    if (intersectionData.error) {
+      intersectionData = null;
+    }
     setIntersectionData(intersectionData);
   }
 
   const showSelectedGroups = () => {
-    if (intersectionData == null) return <Text style={styles.containerRow}>No data</Text>;
+    if (intersectionData == null) return <Text style={[styles.containerRow, styles.text]}>-</Text>;
 
     const result = [];
 
@@ -111,5 +113,9 @@ const styles = StyleSheet.create({
   lights: {
     marginBottom: 15,
     flexDirection: 'row',
+  },
+  text: {
+    fontSize: 20,
+    textAlign: 'center',
   }
 });

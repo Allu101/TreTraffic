@@ -2,8 +2,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import React, { useEffect, useState } from "react";
 import * as Location from 'expo-location';
-//import * as SplashScreen from 'expo-splash-screen';
-import AppStorage from './utils/secure-store.service';
+import AppStorage from './utils/secure-store';
 import Home from './components/Home';
 import Map from './components/MapView';
 
