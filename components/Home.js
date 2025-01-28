@@ -1,12 +1,12 @@
 import { StyleSheet, Text, View } from 'react-native';
 import React, { useEffect, useState } from "react";
 import { useIsFocused } from '@react-navigation/native';
-import MatCommIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import MCIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { getIntersectionData } from '../utils/http-requests';
 
 const iconSize = 70;
 
-export default function Home({ selectedLightGroups }) {
+export default function Home({ selectedLightGroups, setSelectedLightGroups }) {
   const [intersectionData, setIntersectionData] = useState(null);
 
   const isFocused = useIsFocused();
@@ -39,15 +39,18 @@ export default function Home({ selectedLightGroups }) {
 	}
 
   const fetchData = async () => {
-    let intersectionData = await getIntersectionData(selectedLightGroups[0]);
-    if (intersectionData.error) {
-      intersectionData = null;
+    let data = await getIntersectionData(selectedLightGroups[0]);
+    if (data.length == 0) {
+      setSelectedLightGroups([]);
+      return;
     }
-    setIntersectionData(intersectionData);
+    setIntersectionData(data);
   }
 
   const showSelectedGroups = () => {
-    if (intersectionData == null) return <Text style={[styles.containerRow, styles.text]}>-</Text>;
+    if (intersectionData == null || intersectionData.length == 0) {
+      return <Text style={[styles.containerRow, styles.text]}>-</Text>;
+    }
 
     const result = [];
 
@@ -72,10 +75,10 @@ export default function Home({ selectedLightGroups }) {
 
   const getDirectionIcon = (type, state) => {
     switch (type) {
-      case '0': return <MatCommIcons name="walk" size={iconSize} color={getStateColor(state)} />;
-      case '1': return <MatCommIcons name="arrow-left-circle" size={iconSize} color={getStateColor(state)} />;
-      case '2': return <MatCommIcons name="arrow-up-circle" size={iconSize} color={getStateColor(state)} />;
-      case '3': return <MatCommIcons name="arrow-right-circle" size={iconSize} color={getStateColor(state)} />;
+      case '0': return <MCIcons name="walk" size={iconSize} color={getStateColor(state)} />;
+      case '1': return <MCIcons name="arrow-left-circle" size={iconSize} color={getStateColor(state)} />;
+      case '2': return <MCIcons name="arrow-up-circle" size={iconSize} color={getStateColor(state)} />;
+      case '3': return <MCIcons name="arrow-right-circle" size={iconSize} color={getStateColor(state)} />;
     }
   }
 

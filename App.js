@@ -62,7 +62,10 @@ export default function App() {
       >
         <Tab.Screen
           name={'home'}
-          children={() => <Home selectedLightGroups={selectedLightGroups} />}
+          children={() => <Home
+            selectedLightGroups={selectedLightGroups}
+            setSelectedLightGroups={setSelectedLightGroups}
+          />}
           options={{
             title: 'Home',
             tabBarIconStyle: { display: "none" }
