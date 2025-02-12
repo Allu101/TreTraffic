@@ -55,9 +55,13 @@ export default function Map({ setSelectedLightGroups }) {
         }}
         title={intersection.liva_nro}
         description={intersection.paikka}
+        pinColor={intersection.data_available ?
+            intersection.lightGroupsData ? 'green' : 'yellow' : 'red'}
         onPress={(e) => {
-          getIntersectionData(intersection.liva_nro)}
-        }
+          if (intersection.lightGroupsData) {
+            getIntersectionData(intersection.liva_nro)
+          }
+        }}
       >
       </Marker>
     ));

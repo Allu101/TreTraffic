@@ -30,6 +30,9 @@ export default function Home({ selectedLightGroups, setSelectedLightGroups }) {
   const startTimer = (isFocused) => {
 		if (isFocused) {
       fetchData();
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
 			intervalId = setInterval(() => {
 				fetchData();
 			}, 600);
@@ -40,7 +43,7 @@ export default function Home({ selectedLightGroups, setSelectedLightGroups }) {
 
   const fetchData = async () => {
     let data = await getIntersectionData(selectedLightGroups[0]);
-    if (data.length == 0) {
+    if (data.error || data.length == 0) {
       setSelectedLightGroups([]);
       return;
     }
