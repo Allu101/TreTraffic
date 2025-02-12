@@ -27,7 +27,9 @@ export default function App() {
         async (location) => {
           await AppStorage.save(
             'location',
-            `${location.coords.latitude},${location.coords.longitude}`
+            `${location.coords.latitude},
+            ${location.coords.longitude},
+            ${location.coords.heading}`
           );
         }
       );

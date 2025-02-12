@@ -1,13 +1,17 @@
 import { StyleSheet, View, Dimensions } from 'react-native';
 import React, { useEffect, useState, useRef } from 'react';
-import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
+import MapView, { PROVIDER_GOOGLE, Marker, Polyline } from 'react-native-maps';
+import { lineString } from "@turf/helpers";
+import { lineIntersect } from "@turf/line-intersect";
 import AppStorage from '../utils/secure-store';
-import { getAllIntersectionLocations } from '../utils/http-requests';
+import { getAllIntersectionLocations, getAllRouteLines } from '../utils/http-requests';
 
 export default function Map({ setSelectedLightGroups }) {
   const [location, setLocation] = useState(null);
   const [intersections, setIntersections] = useState([]);
   const [markers, setMarkers] = useState([]);
+  const [routeLines, setRouteLines] = useState([]);
+  const [polyLines, setPolyLines] = useState([]);
   const mapViewRef = useRef(null);
 
   const initialRegion = {
@@ -23,13 +27,16 @@ export default function Map({ setSelectedLightGroups }) {
 
   useEffect(() => {
     initMarkers();
+    initRouteLines();
   }, [intersections]);
 
   const fetchLocations = async () => {
     const tempLocation = await AppStorage.getValueFor('location');
     const intersectionLocations = await getAllIntersectionLocations();
-    setIntersections(intersectionLocations);
+    const routeLines = await getAllRouteLines();
     setLocation(tempLocation);
+    setRouteLines(routeLines);
+    setIntersections(intersectionLocations);
   }
 
   function initLocation() {
@@ -57,10 +64,39 @@ export default function Map({ setSelectedLightGroups }) {
     setMarkers(tempMarkers);
   }
 
-  function getIntersectionData(intersection_nro) {
-    setSelectedLightGroups([...[],
-      intersection_nro]);
+  function initRouteLines() {
+    let tempRouteTriggers = [];
+    tempRouteTriggers = routeLines.map((routeLine, i) => (
+      <Polyline
+        key={i}
+        coordinates={[
+          {latitude: routeLine.location[0].latitude,
+            longitude: routeLine.location[0].longitude},
+          {latitude: routeLine.location[1].latitude,
+            longitude: routeLine.location[1].longitude},
+          
+        ]}
+        tappable={true}
+        strokeColor={'orange'}
+        strokeWidth={3}
+        onPress={(e) => {
+          console.log('Route trigger pressed')}
+        }
+      />
+    ));
+    setPolyLines(tempRouteTriggers);
   }
+
+  function getIntersectionData(intersection_nro) {
+    setSelectedLightGroups([...[], intersection_nro]);
+  }
+
+  //let line1 = lineString([[61.49, 23.79], [61.50, 23.80]]);
+  //let line2 = lineString([[61.50, 23.79], [61.49, 23.80]]);
+
+  //let intersects = lineIntersect(line1, line2);
+  //console.log(intersects.features.length);
+  //console.log(JSON.stringify(intersects));
 
   return (
     <View style={styles.container}>
@@ -74,7 +110,8 @@ export default function Map({ setSelectedLightGroups }) {
         onMapLoaded={() => initLocation()}
         Initialregion={initialRegion}
       >
-      {markers}
+        {markers}
+        {polyLines}
       </MapView>
     </View>
   );
