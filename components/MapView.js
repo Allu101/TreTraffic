@@ -1,16 +1,13 @@
 import { StyleSheet, View, Dimensions } from 'react-native';
 import React, { useEffect, useState, useRef } from 'react';
 import MapView, { PROVIDER_GOOGLE, Marker, Polyline } from 'react-native-maps';
-import { lineString } from "@turf/helpers";
-import { lineIntersect } from "@turf/line-intersect";
 import AppStorage from '../utils/secure-store';
-import { getAllIntersectionLocations, getAllRouteLines } from '../utils/http-requests';
+import { getAllIntersectionLocations } from '../utils/http-requests';
 
-export default function Map({ setSelectedLightGroups }) {
+export default function Map({ setSelectedLightGroups, triggerLines }) {
   const [location, setLocation] = useState(null);
   const [intersections, setIntersections] = useState([]);
   const [markers, setMarkers] = useState([]);
-  const [routeLines, setRouteLines] = useState([]);
   const [polyLines, setPolyLines] = useState([]);
   const mapViewRef = useRef(null);
 
@@ -33,9 +30,7 @@ export default function Map({ setSelectedLightGroups }) {
   const fetchLocations = async () => {
     const tempLocation = await AppStorage.getValueFor('location');
     const intersectionLocations = await getAllIntersectionLocations();
-    const routeLines = await getAllRouteLines();
     setLocation(tempLocation);
-    setRouteLines(routeLines);
     setIntersections(intersectionLocations);
   }
 
@@ -59,7 +54,7 @@ export default function Map({ setSelectedLightGroups }) {
             intersection.lightGroupsData ? 'green' : 'yellow' : 'red'}
         onPress={(e) => {
           if (intersection.lightGroupsData) {
-            getIntersectionData(intersection.liva_nro)
+            setSelectedLightGroups([...[], intersection.liva_nro]);
           }
         }}
       >
@@ -69,8 +64,8 @@ export default function Map({ setSelectedLightGroups }) {
   }
 
   function initRouteLines() {
-    let tempRouteTriggers = [];
-    tempRouteTriggers = routeLines.map((routeLine, i) => (
+    let tempRouteLines = [];
+    tempRouteLines = triggerLines.map((routeLine, i) => (
       <Polyline
         key={i}
         coordinates={[
@@ -84,23 +79,13 @@ export default function Map({ setSelectedLightGroups }) {
         strokeColor={'orange'}
         strokeWidth={3}
         onPress={(e) => {
-          console.log('Route trigger pressed')}
+          console.log(new Date().toLocaleTimeString() + ' Route pressed ' + routeLine.triggers['1'].lightGroups);
+        }
         }
       />
     ));
-    setPolyLines(tempRouteTriggers);
+    setPolyLines(tempRouteLines);
   }
-
-  function getIntersectionData(intersection_nro) {
-    setSelectedLightGroups([...[], intersection_nro]);
-  }
-
-  //let line1 = lineString([[61.49, 23.79], [61.50, 23.80]]);
-  //let line2 = lineString([[61.50, 23.79], [61.49, 23.80]]);
-
-  //let intersects = lineIntersect(line1, line2);
-  //console.log(intersects.features.length);
-  //console.log(JSON.stringify(intersects));
 
   return (
     <View style={styles.container}>

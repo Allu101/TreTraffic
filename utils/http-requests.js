@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = "http://192.168.0.4:5000/api/";
+const BASE_URL = "http://192.168.0.3:5000/api/";
 
 async function getAllIntersectionLocations() {
   let result = {};
@@ -14,9 +14,9 @@ async function getAllIntersectionLocations() {
   return result;
 }
 
-async function getAllRouteLines() {
+async function getAllTriggerLines() {
   let result = {};
-  await axios.get(`${BASE_URL}locations/routes/`)
+  await axios.get(`${BASE_URL}triggerlines/`)
     .then(function (response) {
       result = response.data
     })
@@ -29,7 +29,7 @@ async function getAllRouteLines() {
 async function getIntersectionData(intersection_nro) {
   let time = new Date().getTime();
   let result = {};
-  await axios.get(`${BASE_URL}/intersections/intersection/${intersection_nro}`)
+  await axios.get(`${BASE_URL}intersections/intersection/${intersection_nro}`)
     .then(function (response) {
       result = response.data
       console.log(new Date().getTime() - time + ' ms');
@@ -42,6 +42,6 @@ async function getIntersectionData(intersection_nro) {
 
 export {
 	getAllIntersectionLocations,
-  getAllRouteLines,
+  getAllTriggerLines,
   getIntersectionData,
 };
