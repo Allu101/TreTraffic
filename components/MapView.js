@@ -4,7 +4,7 @@ import MapView, { PROVIDER_GOOGLE, Marker, Polyline } from 'react-native-maps';
 import AppStorage from '../utils/secure-store';
 import { getAllIntersectionLocations } from '../utils/http-requests';
 
-export default function Map({ setSelectedLightGroups, triggerLines }) {
+export default function Map({ setSelectedIntersection, setSelectedLightGroups, triggerLines }) {
   const [location, setLocation] = useState(null);
   const [intersections, setIntersections] = useState([]);
   const [markers, setMarkers] = useState([]);
@@ -54,7 +54,7 @@ export default function Map({ setSelectedLightGroups, triggerLines }) {
             intersection.lightGroupsData ? 'green' : 'yellow' : 'red'}
         onPress={(e) => {
           if (intersection.lightGroupsData) {
-            setSelectedLightGroups([...[], intersection.liva_nro]);
+            setSelectedIntersection(intersection.liva_nro);
           }
         }}
       >

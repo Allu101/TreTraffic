@@ -6,14 +6,13 @@ import { getIntersectionData } from '../utils/http-requests';
 
 const iconSize = 70;
 
-export default function Home({ selectedLightGroups, setSelectedLightGroups }) {
-  const [intersectionData, setIntersectionData] = useState(null);
+export default function Home({ intersectionsData, selectedIntersection, selectedLightGroups, setIntersectionsData, setSelectedIntersection }) {
 
   const isFocused = useIsFocused();
   let intervalId = null;
 
   useEffect(() => {
-    if (selectedLightGroups.length <= 0) return;
+    if (selectedIntersection == null) return;
 
 		startTimer(isFocused);
 		return () => {
@@ -22,42 +21,42 @@ export default function Home({ selectedLightGroups, setSelectedLightGroups }) {
 	}, [isFocused]);
 
   useEffect(() => {
-    if (selectedLightGroups.length <= 0) return;
+    if (selectedIntersection == null) return;
     
-    fetchData();
-  }, [selectedLightGroups]);
+    fetchIntersectionData();
+  }, [selectedIntersection]);
 
   const startTimer = (isFocused) => {
 		if (isFocused) {
-      fetchData();
+      fetchIntersectionData();
       if (intervalId) {
         clearInterval(intervalId);
       }
 			intervalId = setInterval(() => {
-				fetchData();
+				fetchIntersectionData();
 			}, 600);
 		} else {
 			clearInterval(intervalId);
 		}
 	}
 
-  const fetchData = async () => {
-    let data = await getIntersectionData(selectedLightGroups[0]);
+  const fetchIntersectionData = async () => {
+    let data = await getIntersectionData(selectedIntersection);
     if (data.error || data.length == 0) {
-      setSelectedLightGroups([]);
+      setSelectedIntersection(null);
       return;
     }
-    setIntersectionData(data);
+    setIntersectionsData(data);
   }
 
   const showSelectedGroups = () => {
-    if (intersectionData == null || intersectionData.length == 0) {
+    if (intersectionsData == null || intersectionsData.length == 0) {
       return <Text style={[styles.containerRow, styles.text]}>-</Text>;
     }
 
     const result = [];
 
-    for (const [key, group] of Object.entries(intersectionData)) {
+    for (const [key, group] of Object.entries(intersectionsData)) {
       result.push(
         <View key={'cr' + key} style={styles.containerRow}>
           <View key={'lights' + key} style={styles.lights}>

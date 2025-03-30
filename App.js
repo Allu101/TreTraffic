@@ -10,8 +10,11 @@ import Map from './components/MapView';
 import { getAllTriggerLines } from './utils/http-requests';
 
 export default function App() {
+  const [intersectionsData, setIntersectionsData] = useState(null);
+  //const [lightGroupsData, setLightGroupsData] = useState(null);
   const [selectedLightGroups, setSelectedLightGroups] = useState([]);
   const [triggerLines, setTriggerLines] = useState([]);
+  const [selectedIntersection, setSelectedIntersection] = useState(null);
 
   const Tab = createBottomTabNavigator();
   let positionStream = null;
@@ -120,8 +123,12 @@ export default function App() {
         <Tab.Screen
           name={'home'}
           children={() => <Home
+            intersectionsData={intersectionsData}
+            selectedIntersection={selectedIntersection}
             selectedLightGroups={selectedLightGroups}
+            setSelectedIntersection={setSelectedIntersection}
             setSelectedLightGroups={setSelectedLightGroups}
+            setIntersectionsData={setIntersectionsData}
           />}
           options={{
             title: 'Home',
@@ -133,7 +140,9 @@ export default function App() {
           children={() =>
             <Map
               setSelectedLightGroups={setSelectedLightGroups}
+              setIntersectionsData={setIntersectionsData}
               triggerLines={triggerLines}
+              setSelectedIntersection={setSelectedIntersection}
             />}
           options={{
             title: 'Map',
