@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 import React, { useEffect, useState } from "react";
 import { useIsFocused } from '@react-navigation/native';
-import MCIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { getIntersectionData } from '../utils/http-requests';
 
 const iconSize = 70;
@@ -63,7 +63,7 @@ export default function Home({ intersectionsData, selectedIntersection, selected
             {group.lights.map((light, index) => {
               return (
                 <View key={'light' + index} style={styles.light}>
-                  {getDirectionIcon(light.type, light.state)}
+                  {getColoredDirectionIcon(light.type, light.state)}
                 </View>
               )
             })}
@@ -75,12 +75,40 @@ export default function Home({ intersectionsData, selectedIntersection, selected
     return result;
   }
 
-  const getDirectionIcon = (type, state) => {
+  const getColoredDirectionIcon = (type, state) => {
     switch (type) {
-      case '0': return <MCIcons name="walk" size={iconSize} color={getStateColor(state)} />;
-      case '1': return <MCIcons name="arrow-left-circle" size={iconSize} color={getStateColor(state)} />;
-      case '2': return <MCIcons name="arrow-up-circle" size={iconSize} color={getStateColor(state)} />;
-      case '3': return <MCIcons name="arrow-right-circle" size={iconSize} color={getStateColor(state)} />;
+      case '0':
+        return (
+          <MaterialCommunityIcons
+            color={getStateColor(state)}
+            name="walk"
+            size={iconSize} 
+          />
+        );
+      case '1':
+        return (
+          <MaterialCommunityIcons
+            color={getStateColor(state)}
+            name="arrow-left-circle"
+            size={iconSize} 
+          />
+        );
+      case '2':
+        return (
+          <MaterialCommunityIcons
+            color={getStateColor(state)}
+            name="arrow-up-circle"
+            size={iconSize} 
+          />
+        );
+      case '3':
+        return (
+          <MaterialCommunityIcons
+            color={getStateColor(state)}
+            name="arrow-right-circle"
+            size={iconSize} 
+          />
+        );
     }
   }
 
