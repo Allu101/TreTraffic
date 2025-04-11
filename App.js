@@ -11,8 +11,8 @@ import { getAllTriggerLines } from './utils/http-requests';
 
 export default function App() {
   const [intersectionsData, setIntersectionsData] = useState(null);
-  //const [lightGroupsData, setLightGroupsData] = useState(null);
-  const [selectedLightGroups, setSelectedLightGroups] = useState([]);
+  const [lightGroupsData, setLightGroupsData] = useState(null);
+  const [selectedLightGroups, setSelectedLightGroups] = useState(null);
   const [triggerLines, setTriggerLines] = useState([]);
   const [selectedIntersection, setSelectedIntersection] = useState(null);
 
@@ -76,7 +76,7 @@ export default function App() {
                 console.log(location.coords.heading);
                 if (location.coords.heading > line.triggers['1'].direction - line.triggers['1'].directionRange &&
                     location.coords.heading < line.triggers['1'].direction + line.triggers['1'].directionRange) {
-                  //setSelectedLightGroups([...[], line.triggers['1'].lightGroups]);
+                  setSelectedLightGroups(line.triggers['1'].lightGroups);
                   console.log(new Date().toLocaleTimeString() + line.triggers['1'].lightGroups + ' ' + location.coords.heading);
                 }
               }
@@ -124,11 +124,13 @@ export default function App() {
           name={'home'}
           children={() => <Home
             intersectionsData={intersectionsData}
+            lightGroupsData={lightGroupsData}
             selectedIntersection={selectedIntersection}
             selectedLightGroups={selectedLightGroups}
+            setIntersectionsData={setIntersectionsData}
+            setLightGroupsData={setLightGroupsData}
             setSelectedIntersection={setSelectedIntersection}
             setSelectedLightGroups={setSelectedLightGroups}
-            setIntersectionsData={setIntersectionsData}
           />}
           options={{
             title: 'Home',

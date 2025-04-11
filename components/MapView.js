@@ -79,6 +79,7 @@ export default function Map({ setSelectedIntersection, setSelectedLightGroups, t
         strokeColor={'orange'}
         strokeWidth={3}
         onPress={(e) => {
+          setSelectedLightGroups(routeLine.triggers['1'].lightGroups);
           console.log(new Date().toLocaleTimeString() + ' Route pressed ' + routeLine.triggers['1'].lightGroups);
         }
         }

@@ -1,62 +1,105 @@
 import { StyleSheet, Text, View } from 'react-native';
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useIsFocused } from '@react-navigation/native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { getIntersectionData } from '../utils/http-requests';
+import { getIntersectionData, getLightGroupsData } from '../utils/http-requests';
 
 const iconSize = 70;
+const timerInterval = 750;
 
-export default function Home({ intersectionsData, selectedIntersection, selectedLightGroups, setIntersectionsData, setSelectedIntersection }) {
+export default function Home({ intersectionsData, lightGroupsData, selectedIntersection, selectedLightGroups, setIntersectionsData, setLightGroupsData, setSelectedIntersection, setSelectedLightGroups }) {
 
   const isFocused = useIsFocused();
-  let intervalId = null;
+  let intersectionTimerId = null;
+  let lightGroupTimerId = null;
 
   useEffect(() => {
-    if (selectedIntersection == null) return;
-
-		startTimer(isFocused);
+    if (selectedIntersection != null) {
+		  startIntersectionTimer(isFocused);
+    }
+    if (selectedLightGroups != null) {
+      startLightGroupTimer(isFocused);
+    }
 		return () => {
-			clearInterval(intervalId);
+			clearInterval(intersectionTimerId);
+      clearInterval(lightGroupTimerId);
 		}
 	}, [isFocused]);
 
   useEffect(() => {
     if (selectedIntersection == null) return;
     
+    if (selectedLightGroups != null) {
+      setSelectedLightGroups(null);
+    }
     fetchIntersectionData();
   }, [selectedIntersection]);
 
-  const startTimer = (isFocused) => {
-		if (isFocused) {
-      fetchIntersectionData();
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-			intervalId = setInterval(() => {
-				fetchIntersectionData();
-			}, 600);
-		} else {
-			clearInterval(intervalId);
-		}
-	}
+  useEffect(() => {
+    if (selectedLightGroups == null) return;
+
+    if (selectedIntersection != null) {
+      setSelectedIntersection(null);
+    }
+    fetchLightGroupsData();
+  }, [selectedLightGroups]);
 
   const fetchIntersectionData = async () => {
     let data = await getIntersectionData(selectedIntersection);
-    if (data.error || data.length == 0) {
+    if (data == null || data.length == 0) {
       setSelectedIntersection(null);
       return;
     }
     setIntersectionsData(data);
   }
 
+  const fetchLightGroupsData = async () => {
+    let data = await getLightGroupsData(selectedLightGroups);
+    if (data == null || data.length == 0) {
+      setSelectedLightGroups(null);
+      return;
+    }
+    setLightGroupsData(data);
+  }
+
+  const startIntersectionTimer = (isFocused) => {
+		if (isFocused) {
+      fetchIntersectionData();
+      if (intersectionTimerId) {
+        clearInterval(intersectionTimerId);
+      }
+			intersectionTimerId = setInterval(() => {
+				fetchIntersectionData();
+			}, timerInterval);
+		} else {
+			clearInterval(intersectionTimerId);
+		}
+	}
+
+  const startLightGroupTimer = (isFocused) => {
+		if (isFocused) {
+      fetchLightGroupsData();
+      if (lightGroupTimerId) {
+        clearInterval(lightGroupTimerId);
+      }
+			lightGroupTimerId = setInterval(() => {
+				fetchLightGroupsData();
+			}, timerInterval);
+		} else {
+			clearInterval(lightGroupTimerId);
+		}
+	}
+
   const showSelectedGroups = () => {
-    if (intersectionsData == null || intersectionsData.length == 0) {
+    const selectedData = getSelectedData();
+
+    if (selectedData == null || selectedData.length == 0) {
       return <Text style={[styles.containerRow, styles.text]}>-</Text>;
     }
 
     const result = [];
 
-    for (const [key, group] of Object.entries(intersectionsData)) {
+    for (const [key, group] of Object.entries(selectedData)) {
       result.push(
         <View key={'cr' + key} style={styles.containerRow}>
           <View key={'lights' + key} style={styles.lights}>
@@ -73,6 +116,15 @@ export default function Home({ intersectionsData, selectedIntersection, selected
       );
     }
     return result;
+  }
+
+  const getSelectedData = () => {
+    if (selectedIntersection != null && selectedIntersection.length > 0) {
+      return intersectionsData;
+    } else if (lightGroupsData != null && lightGroupsData.length > 0) {
+      return lightGroupsData;
+    }
+    return null;
   }
 
   const getColoredDirectionIcon = (type, state) => {
