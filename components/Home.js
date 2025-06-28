@@ -5,9 +5,11 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { getIntersectionData, getLightGroupsData } from '../utils/http-requests';
 
 const iconSize = 70;
-const timerInterval = 750;
+const timerInterval = 1000;
 
-export default function Home({ intersectionsData, lightGroupsData, selectedIntersection, selectedLightGroups, setIntersectionsData, setLightGroupsData, setSelectedIntersection, setSelectedLightGroups }) {
+export default function Home({ intersectionsData, lightGroupsData,
+    selectedIntersection, selectedLightGroups, setIntersectionsData,
+    setLightGroupsData, setSelectedIntersection, setSelectedLightGroups}) {
 
   const isFocused = useIsFocused();
   let intersectionTimerId = null;
@@ -107,6 +109,8 @@ export default function Home({ intersectionsData, lightGroupsData, selectedInter
               return (
                 <View key={'light' + index} style={styles.light}>
                   {getColoredDirectionIcon(light.type, light.state)}
+                  <Text style={styles.secondsText}>
+                    {light.currentTime}s/{light.estimatedChangeTime}s</Text>
                 </View>
               )
             })}
@@ -192,12 +196,16 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
   },
   light: {
-    marginHorizontal: '7%',
+    marginHorizontal: '5%',
     alignItems: 'center',
   },
   lights: {
     marginBottom: 15,
     flexDirection: 'row',
+  },
+  secondsText: {
+    fontSize: 26,
+    textAlign: 'center',
   },
   text: {
     fontSize: 20,
