@@ -50,8 +50,8 @@ export default function Map({ setSelectedIntersection, setSelectedLightGroups, t
         }}
         title={intersection.liva_nro}
         description={intersection.paikka}
-        pinColor={intersection.data_available ?
-            intersection.lightGroupsData ? 'green' : 'yellow' : 'red'}
+        pinColor={intersection.data_available ? (intersection.hasLightGroups ?
+          (intersection.hasTimeValues ? 'green' : 'yellow') : 'orange') : 'tomato'}
         onPress={(e) => {
           if (intersection.lightGroupsData) {
             setSelectedIntersection(intersection.liva_nro);
@@ -76,7 +76,7 @@ export default function Map({ setSelectedIntersection, setSelectedLightGroups, t
           
         ]}
         tappable={true}
-        strokeColor={'orange'}
+        strokeColor={'limegreen'}
         strokeWidth={3}
         onPress={(e) => {
           setSelectedLightGroups(routeLine.triggers['1'].lightGroups);
