@@ -53,7 +53,7 @@ export default function Map({ setSelectedIntersection, setSelectedLightGroups, t
         pinColor={intersection.data_available ? (intersection.hasLightGroups ?
           (intersection.hasTimeValues ? 'green' : 'yellow') : 'orange') : 'tomato'}
         onPress={(e) => {
-          if (intersection.lightGroupsData) {
+          if (intersection.hasLightGroups) {
             setSelectedIntersection(intersection.liva_nro);
           }
         }}
