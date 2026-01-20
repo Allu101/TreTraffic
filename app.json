@@ -2,7 +2,7 @@
   "expo": {
     "name": "TreTraffic",
     "slug": "TreTraffic",
-    "version": "1.0.0",
+    "version": "0.2.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -16,7 +16,7 @@
       "bundleIdentifier": "com.allu.tretraffic",
       "supportsTablet": true,
       "config": {
-        "googleMapsApiKey": ""
+        "googleMapsApiKey": "AIzaSyD8XnCt9cwlbcDdpxsRUYpF2VHcyJ__AEI"
       }
     },
     "android": {
@@ -27,7 +27,7 @@
       "package": "com.allu.tretraffic",
       "config": {
         "googleMaps": {
-          "apiKey": ""
+          "apiKey": "AIzaSyD8XnCt9cwlbcDdpxsRUYpF2VHcyJ__AEI"
         }
       }
     },
