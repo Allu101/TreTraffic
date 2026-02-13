@@ -12,8 +12,8 @@ export default function Map({ setSelectedIntersection, setSelectedLightGroups, t
   const mapViewRef = useRef(null);
 
   const initialRegion = {
-    latitude: location != null ? parseFloat(location.latitude) : 61.49,
-    longitude: location != null ? parseFloat(location.longitude) : 23.79,
+    latitude: 61.49, //location != null ? parseFloat(location.latitude) : 61.49,
+    longitude: 23.79, //location != null ? parseFloat(location.longitude) : 23.79,
     latitudeDelta: 0.0455,
     longitudeDelta: 0.0211,
   };
@@ -53,7 +53,7 @@ export default function Map({ setSelectedIntersection, setSelectedLightGroups, t
         pinColor={intersection.data_available ? (intersection.hasLightGroups ?
           (intersection.hasTimeValues ? 'green' : 'yellow') : 'orange') : 'tomato'}
         onPress={(e) => {
-          if (intersection.hasLightGroups) {
+          if (intersection.data_available && intersection.hasLightGroups) {
             setSelectedIntersection(intersection.liva_nro);
           }
         }}
@@ -98,7 +98,16 @@ export default function Map({ setSelectedIntersection, setSelectedLightGroups, t
         style={styles.map}
         provider={PROVIDER_GOOGLE}
         onMapLoaded={() => initLocation()}
-        Initialregion={initialRegion}
+        initialCamera={{
+          center: {
+            latitude: location != null ? parseFloat(location.latitude) : 61.49,
+            longitude: location != null ? parseFloat(location.longitude) : 23.79,
+          },
+          pitch: 0,
+          heading: 0,
+          zoom: 11,
+          altitude: 35000,
+        }}
       >
         {markers}
         {polyLines}
@@ -112,10 +121,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     alignItems: 'center',
-    justifyContent: 'center',
   },
   map: {
     width: Dimensions.get('window').width,
-    height: Dimensions.get('window').height - 25,
+    height: Dimensions.get('window').height * 0.925,
   },
 });
