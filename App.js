@@ -1,6 +1,7 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import React, { useEffect, useState } from "react";
+import { StatusBar } from 'expo-status-bar';
 import * as Location from 'expo-location';
 import { lineString } from "@turf/helpers";
 import { lineIntersect } from "@turf/line-intersect";
@@ -96,6 +97,7 @@ export default function App() {
 
   return (
     <NavigationContainer independent={true}>
+      <StatusBar style="dark" />
       <Tab.Navigator
         initialRouteName={'home'}
         screenOptions={{
