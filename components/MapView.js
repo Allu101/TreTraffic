@@ -65,6 +65,8 @@ export default function Map({ setSelectedIntersection, setSelectedLightGroups, t
 
   function initRouteLines() {
     let tempRouteLines = [];
+    if (!triggerLines) return;
+    
     tempRouteLines = triggerLines.map((routeLine, i) => (
       <Polyline
         key={i}

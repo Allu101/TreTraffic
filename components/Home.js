@@ -48,7 +48,10 @@ export default function Home({ intersectionsData, lightGroupsData,
 
   const fetchIntersectionData = async () => {
     let data = await getIntersectionData(selectedIntersection);
-    if (data == null || undefined || data.length == 0) {
+    if (data.error) {
+      return;
+    }
+    if (data == undefined || data.length == 0) {
       setSelectedIntersection(null);
       return;
     }
@@ -57,7 +60,10 @@ export default function Home({ intersectionsData, lightGroupsData,
 
   const fetchLightGroupsData = async () => {
     let data = await getLightGroupsData(selectedLightGroups);
-    if (data == null || undefined || data.length == 0) {
+    if (data.error) {
+      return;
+    }
+    if (data == undefined || data.length == 0) {
       setSelectedLightGroups(null);
       return;
     }
