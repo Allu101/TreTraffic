@@ -102,8 +102,8 @@ export default function App() {
         initialRouteName={'home'}
         screenOptions={{
           tabBarActiveBackgroundColor: '#111',
-          tabBarInactiveBackgroundColor: '#111',
-          tabBarActiveTintColor: '#FFF',
+          tabBarInactiveBackgroundColor: '#222',
+          tabBarActiveTintColor: '#FEE',
           tabBarInactiveTintColor: '#777',
           tabBarLabelStyle: {
             fontSize: 25,
