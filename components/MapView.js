@@ -1,4 +1,4 @@
-import { StyleSheet, View, Dimensions } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import React, { useEffect, useState, useRef } from 'react';
 import MapView, { PROVIDER_GOOGLE, Marker, Polyline } from 'react-native-maps';
 import AppStorage from '../utils/secure-store';
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   map: {
-    width: Dimensions.get('window').width,
-    height: Dimensions.get('screen').height * 0.87,
+    width: '100%',
+    height: '100%',
   },
 });
