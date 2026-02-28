@@ -9,6 +9,7 @@ import AppStorage from './utils/secure-store';
 import Home from './components/Home';
 import Map from './components/MapView';
 import { getAllTriggerLines } from './utils/http-requests';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function App() {
   const [intersectionsData, setIntersectionsData] = useState(null);
@@ -96,65 +97,67 @@ export default function App() {
   }
 
   return (
-    <NavigationContainer independent={true}>
-      <StatusBar style="dark" />
-      <Tab.Navigator
-        initialRouteName={'home'}
-        screenOptions={{
-          tabBarActiveBackgroundColor: '#111',
-          tabBarInactiveBackgroundColor: '#222',
-          tabBarActiveTintColor: '#FEE',
-          tabBarInactiveTintColor: '#777',
-          tabBarLabelStyle: {
-            fontSize: 25,
-            marginBottom: 15,
-          },
-          tabBarStyle: {
-            height: 65,
-          },
-          headerTitleStyle: {
-            color: '#111'
-          },
-          headerBackgroundContainerStyle: {
-            backgroundColor: '#AAA',
-            alignItems: 'center',
-          },
-          headerShown: false,
-        }}
-      >
-        <Tab.Screen
-          name={'home'}
-          children={() => <Home
-            intersectionsData={intersectionsData}
-            lightGroupsData={lightGroupsData}
-            selectedIntersection={selectedIntersection}
-            selectedLightGroups={selectedLightGroups}
-            setIntersectionsData={setIntersectionsData}
-            setLightGroupsData={setLightGroupsData}
-            setSelectedIntersection={setSelectedIntersection}
-            setSelectedLightGroups={setSelectedLightGroups}
-          />}
-          options={{
-            title: 'Home',
-            tabBarIconStyle: { display: "none" }
+    <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
+      <NavigationContainer independent={true}>
+        <StatusBar style="dark" />
+        <Tab.Navigator
+          initialRouteName={'home'}
+          screenOptions={{
+            tabBarActiveBackgroundColor: '#111',
+            tabBarInactiveBackgroundColor: '#222',
+            tabBarActiveTintColor: '#FEE',
+            tabBarInactiveTintColor: '#777',
+            tabBarLabelStyle: {
+              fontSize: 25,
+              marginBottom: 12,
+            },
+            tabBarStyle: {
+              height: 60,
+            },
+            headerTitleStyle: {
+              color: '#111'
+            },
+            headerBackgroundContainerStyle: {
+              backgroundColor: '#AAA',
+              alignItems: 'center',
+            },
+            headerShown: false,
           }}
-        />
-        <Tab.Screen
-          name={'map'}
-          children={() =>
-            <Map
-              setSelectedLightGroups={setSelectedLightGroups}
+        >
+          <Tab.Screen
+            name={'home'}
+            children={() => <Home
+              intersectionsData={intersectionsData}
+              lightGroupsData={lightGroupsData}
+              selectedIntersection={selectedIntersection}
+              selectedLightGroups={selectedLightGroups}
               setIntersectionsData={setIntersectionsData}
-              triggerLines={triggerLines}
+              setLightGroupsData={setLightGroupsData}
               setSelectedIntersection={setSelectedIntersection}
+              setSelectedLightGroups={setSelectedLightGroups}
             />}
-          options={{
-            title: 'Map',
-            tabBarIconStyle: { display: "none" }
-            
-          }}
-        />
-      </Tab.Navigator>
-    </NavigationContainer>
+            options={{
+              title: 'Home',
+              tabBarIconStyle: { display: "none" }
+            }}
+          />
+          <Tab.Screen
+            name={'map'}
+            children={() =>
+              <Map
+                setSelectedLightGroups={setSelectedLightGroups}
+                setIntersectionsData={setIntersectionsData}
+                triggerLines={triggerLines}
+                setSelectedIntersection={setSelectedIntersection}
+              />}
+            options={{
+              title: 'Map',
+              tabBarIconStyle: { display: "none" }
+              
+            }}
+          />
+        </Tab.Navigator>
+      </NavigationContainer>
+    </SafeAreaView>
   );
 }
