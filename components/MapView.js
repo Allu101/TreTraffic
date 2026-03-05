@@ -41,6 +41,8 @@ export default function Map({ setSelectedIntersection, setSelectedLightGroups, t
 
   function initMarkers() {
     let tempMarkers = [];
+    if (intersections.error) return;
+
     tempMarkers = intersections.map((intersection) => (
       <Marker
         key={intersection.id}
@@ -65,7 +67,7 @@ export default function Map({ setSelectedIntersection, setSelectedLightGroups, t
 
   function initRouteLines() {
     let tempRouteLines = [];
-    if (!triggerLines) return;
+    if (triggerLines.error) return;
     
     tempRouteLines = triggerLines.map((routeLine, i) => (
       <Polyline

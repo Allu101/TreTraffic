@@ -64,6 +64,8 @@ export default function App() {
             const locLat = parseFloat(location.coords.latitude);
             const locLon = parseFloat(location.coords.longitude);
 
+            if (!triggerLines) return;
+
             triggerLines.forEach((line) => {
               let triggerLine = lineString([[line.location[0].latitude, line.location[0].longitude],
                   [line.location[1].latitude, line.location[1].longitude]]);
