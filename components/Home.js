@@ -197,11 +197,11 @@ export default function Home({ intersectionsData, lightGroupsData,
   }
 
   const getStateColor = (state) => {
-    if ("ABDEFGH9".includes(state)) return 'red';
-    if ("C".includes(state)) return 'darkred';
-    if (":<>0".includes(state)) return 'orange';
-    if ("135678".includes(state)) return 'green';
-    if ("4".includes(state)) return 'limegreen';
+    if ('ABDEFGH9'.includes(state)) return 'red';
+    if ('C'.includes(state)) return 'darkred';
+    if (':<>0'.includes(state)) return 'orange';
+    if ('135678'.includes(state)) return 'green';
+    if ('4'.includes(state)) return 'limegreen';
     return 'grey';
   }
 
