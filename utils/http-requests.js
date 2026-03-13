@@ -1,17 +1,21 @@
 import axios from "axios";
 import { API_KEY } from '@env';
 
-//const BASE_URL = "http://192.168.0.3:5000/api/";
-const BASE_URL = "https://12f4-2001-99a-19d-2900-5d23-645a-259d-2b80.ngrok-free.app/api/";
+const DEFAULT_BASE_URL = "http://192.168.0.3:5000/api/";
+//const DEFAULT_BASE_URL = "https://12f4-2001-99a-19d-2900-5d23-645a-259d-2b80.ngrok-free.app/api/";
 
 const api = axios.create({
-  baseURL: BASE_URL,
+  baseURL: DEFAULT_BASE_URL,
   headers: {
     'Authorization': `Bearer ${API_KEY}`,
     'Content-Type': 'application/json',
   },
   timeout: 3000,
 });
+
+function setBaseUrlOverride(baseUrl) {
+  api.defaults.baseURL = baseUrl || DEFAULT_BASE_URL;
+}
 
 function handleApiError(error, name) {
   const errorRes = {
@@ -69,4 +73,5 @@ export {
   getAllTriggerLines,
   getIntersectionData,
   getLightGroupsData,
+  setBaseUrlOverride,
 };
