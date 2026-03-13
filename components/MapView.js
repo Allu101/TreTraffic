@@ -2,11 +2,9 @@ import { StyleSheet, View } from 'react-native';
 import React, { useEffect, useState, useRef } from 'react';
 import MapView, { PROVIDER_GOOGLE, Marker, Polyline } from 'react-native-maps';
 import AppStorage from '../utils/secure-store';
-import { getAllIntersectionLocations } from '../utils/http-requests';
 
-export default function Map({ setSelectedIntersection, setSelectedLightGroups, triggerLines }) {
+export default function Map({ intersectionLocations, setSelectedIntersection, setSelectedLightGroups, triggerLines }) {
   const [location, setLocation] = useState(null);
-  const [intersections, setIntersections] = useState([]);
   const [markers, setMarkers] = useState([]);
   const [polyLines, setPolyLines] = useState([]);
   const mapViewRef = useRef(null);
@@ -25,13 +23,11 @@ export default function Map({ setSelectedIntersection, setSelectedLightGroups, t
   useEffect(() => {
     initMarkers();
     initRouteLines();
-  }, [intersections]);
+  }, [intersectionLocations]);
 
   const fetchLocations = async () => {
     const tempLocation = await AppStorage.getValueFor('location');
-    const intersectionLocations = await getAllIntersectionLocations();
     setLocation(tempLocation);
-    setIntersections(intersectionLocations);
   }
 
   function initLocation() {
@@ -41,9 +37,9 @@ export default function Map({ setSelectedIntersection, setSelectedLightGroups, t
 
   function initMarkers() {
     let tempMarkers = [];
-    if (intersections.error) return;
+    if (intersectionLocations.error) return;
 
-    tempMarkers = intersections.map((intersection) => (
+    tempMarkers = intersectionLocations.map((intersection) => (
       <Marker
         key={intersection.id}
         coordinate={{

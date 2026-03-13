@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, ScrollView } from 'react-native';
 import React, { useEffect } from "react";
 import { useIsFocused } from '@react-navigation/native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
@@ -7,20 +7,21 @@ import { getIntersectionData, getLightGroupsData } from '../utils/http-requests'
 const iconSize = 70;
 const timerInterval = 1000;
 
+let intersectionTimerId = null;
+let lightGroupTimerId = null;
+
 export default function Home({ intersectionsData, lightGroupsData,
     selectedIntersection, selectedLightGroups, setIntersectionsData,
-    setLightGroupsData, setSelectedIntersection, setSelectedLightGroups}) {
+    setLightGroupsData, setSelectedIntersection, setSelectedLightGroups, startPositionStream }) {
 
   const isFocused = useIsFocused();
-  let intersectionTimerId = null;
-  let lightGroupTimerId = null;
-
+ 
   useEffect(() => {
-    if (selectedIntersection != null) {
-		  startIntersectionTimer(isFocused);
+    if (selectedIntersection.length > 0) {
+		  restartIntersectionTimer(isFocused);
     }
-    if (selectedLightGroups != null) {
-      startLightGroupTimer(isFocused);
+    if (selectedLightGroups.length > 0) {
+      restartLightGroupTimer(isFocused);
     }
 		return () => {
 			clearInterval(intersectionTimerId);
@@ -30,19 +31,39 @@ export default function Home({ intersectionsData, lightGroupsData,
 
   useEffect(() => {
     if (selectedIntersection == null) return;
-    
-    if (selectedLightGroups != null) {
-      setSelectedLightGroups(null);
+
+    if (selectedIntersection.length == 0) {
+      clearInterval(intersectionTimerId);
+      return;
     }
+    if (selectedLightGroups.length > 0) {
+      setSelectedLightGroups([]);
+      return;
+    }
+
+    if (isFocused) {
+      restartIntersectionTimer(true);
+    }
+    startPositionStream();
     fetchIntersectionData();
   }, [selectedIntersection]);
 
   useEffect(() => {
     if (selectedLightGroups == null) return;
 
-    if (selectedIntersection != null) {
-      setSelectedIntersection(null);
+    if (selectedLightGroups.length == 0) {
+      clearInterval(lightGroupTimerId);
+      return;
     }
+    if (selectedIntersection.length > 0) {
+      setSelectedIntersection([]);
+      return;
+    }
+
+    if (isFocused) {
+      restartLightGroupTimer(true);
+    }
+    startPositionStream();
     fetchLightGroupsData();
   }, [selectedLightGroups]);
 
@@ -52,7 +73,7 @@ export default function Home({ intersectionsData, lightGroupsData,
       return;
     }
     if (data == undefined || data.length == 0) {
-      setSelectedIntersection(null);
+      setSelectedIntersection([]);
       return;
     }
     setIntersectionsData(data);
@@ -64,13 +85,13 @@ export default function Home({ intersectionsData, lightGroupsData,
       return;
     }
     if (data == undefined || data.length == 0) {
-      setSelectedLightGroups(null);
+      setSelectedLightGroups([]);
       return;
     }
     setLightGroupsData(data);
   }
 
-  const startIntersectionTimer = (isFocused) => {
+  const restartIntersectionTimer = (isFocused) => {
 		if (isFocused) {
       fetchIntersectionData();
       if (intersectionTimerId) {
@@ -84,7 +105,7 @@ export default function Home({ intersectionsData, lightGroupsData,
 		}
 	}
 
-  const startLightGroupTimer = (isFocused) => {
+  const restartLightGroupTimer = (isFocused) => {
 		if (isFocused) {
       fetchLightGroupsData();
       if (lightGroupTimerId) {
@@ -115,6 +136,7 @@ export default function Home({ intersectionsData, lightGroupsData,
               return (
                 <View key={'light' + index} style={styles.light}>
                   {getColoredDirectionIcon(light.type, light.state)}
+                  <Text style={styles.text}>{light.state}</Text>
                   <Text style={styles.secondsText}>
                     {light.currentTime}s/{light.estimatedChangeTime}s</Text>
                 </View>
@@ -129,9 +151,9 @@ export default function Home({ intersectionsData, lightGroupsData,
   }
 
   const getSelectedData = () => {
-    if (selectedIntersection != null && selectedIntersection.length > 0) {
+    if (selectedIntersection?.length > 0) {
       return intersectionsData;
-    } else if (lightGroupsData != null && lightGroupsData.length > 0) {
+    } else if (selectedLightGroups?.length > 0) {
       return lightGroupsData;
     }
     return null;
@@ -177,40 +199,55 @@ export default function Home({ intersectionsData, lightGroupsData,
   const getStateColor = (state) => {
     if ("ABDEFGH9".includes(state)) return 'red';
     if ("C".includes(state)) return 'darkred';
-    if (":<0".includes(state)) return 'orange';
-    if ("1345678".includes(state)) return 'green';
+    if (":<>0".includes(state)) return 'orange';
+    if ("135678".includes(state)) return 'green';
+    if ("4".includes(state)) return 'limegreen';
     return 'grey';
   }
 
   return (
+    <>
     <View style={styles.container}>
-      {showSelectedGroups()}
+      <MaterialCommunityIcons
+        color={'black'}
+        name="car"
+        size={40}
+        onPress={() => {
+          console.log("car icon pressed");
+        }}
+      />
     </View>
+    <ScrollView >
+      {showSelectedGroups()}
+    </ScrollView>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 60,
+    borderBottomWidth: 1,
+    borderBottomColor: '#111',
+    padding: 5,
   },
   containerRow: {
     alignItems: 'center',
     borderBottomWidth: 1,
     borderBottomColor: '#111',
-    paddingVertical: 10,
+    paddingVertical: 5,
     borderTopColor: '#111',
-    borderTopWidth: 1,
+    borderTopWidth: 0,
   },
   light: {
-    marginHorizontal: '5%',
+    marginHorizontal: '2%',
     alignItems: 'center',
   },
   lights: {
-    marginBottom: 15,
+    marginBottom: 10,
     flexDirection: 'row',
   },
   secondsText: {
-    fontSize: 26,
+    fontSize: 28,
     textAlign: 'center',
   },
   text: {
