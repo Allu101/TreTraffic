@@ -12,7 +12,7 @@ let lightGroupTimerId = null;
 
 export default function Home({ intersectionsData, lightGroupsData,
     selectedIntersection, selectedLightGroups, setIntersectionsData,
-    setLightGroupsData, setSelectedIntersection, setSelectedLightGroups, startPositionStream }) {
+    setLightGroupsData, setSelectedIntersection, setSelectedLightGroups, startPositionStream, openBaseUrlDrawer }) {
 
   const isFocused = useIsFocused();
  
@@ -207,13 +207,14 @@ export default function Home({ intersectionsData, lightGroupsData,
 
   return (
     <>
-    <View style={styles.container}>
+    <View style={styles.header}>
       <MaterialCommunityIcons
         color={'black'}
         name="car"
         size={40}
         onPress={() => {
           console.log("car icon pressed");
+          openBaseUrlDrawer();
         }}
       />
     </View>
@@ -225,10 +226,13 @@ export default function Home({ intersectionsData, lightGroupsData,
 }
 
 const styles = StyleSheet.create({
-  container: {
+  header: {
     borderBottomWidth: 1,
     borderBottomColor: '#111',
-    padding: 5,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
   },
   containerRow: {
     alignItems: 'center',

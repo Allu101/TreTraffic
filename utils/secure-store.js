@@ -1,6 +1,11 @@
 import * as SecureStore from 'expo-secure-store'
 
-const getValueFor = async (key) => {
+const mode = Object.freeze({
+  Cars: 'Cars',
+  Pedestrians: 'Pedestrians',
+});
+
+const getValue = async (key) => {
   const value = await SecureStore.getItemAsync(key);
   if (key === 'location') {
     if (value != null && value != "") {
@@ -25,6 +30,7 @@ const save = async (key, value) => {
 }
 
 export default {
-  getValueFor: getValueFor,
-  save: save,
+  Mode: mode,
+  getValue,
+  save,
 }

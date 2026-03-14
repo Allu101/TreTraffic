@@ -7,10 +7,11 @@ import { lineString } from "@turf/helpers";
 import { lineIntersect } from "@turf/line-intersect";
 import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { getDistance } from 'geolib';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import AppStorage from './utils/secure-store';
 import Home from './components/Home';
 import Map from './components/MapView';
-import { getAllTriggerLines, getAllIntersectionLocations,
+import { Mode, getAllTriggerLines, getAllIntersectionLocations,
   setBaseUrlOverride } from './utils/http-requests';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -23,14 +24,20 @@ export default function App() {
   const [lightGroupsData, setLightGroupsData] = useState(null);
   const [selectedIntersection, setSelectedIntersection] = useState([]);
   const [selectedLightGroups, setSelectedLightGroups] = useState([]);
+  const [currentMode, setCurrentMode] = useState(Mode.Cars);
 
   const [triggerLines, setTriggerLines] = useState([]);
   const [isBaseUrlDrawerVisible, setIsBaseUrlDrawerVisible] = useState(false);
   const [baseUrlInput, setBaseUrlInput] = useState('');
 
-  const Tab = createBottomTabNavigator();  
+  const Tab = createBottomTabNavigator();
 
   useEffect(() => {
+    const initMode = async () => {
+      const storedMode = await AppStorage.getValue('mode') || Mode.Cars;
+      setCurrentMode(storedMode);
+    }
+    initMode();
     initBaseUrl();
     initTriggerLines();
     fetchGPS();
@@ -43,7 +50,7 @@ export default function App() {
   }, []);
 
   const initBaseUrl = async () => {
-    const storedBaseUrl = await AppStorage.getValueFor(BASE_URL_KEY);
+    const storedBaseUrl = await AppStorage.getValue(BASE_URL_KEY);
     const sanitizedBaseUrl = (storedBaseUrl || '').trim();
 
     if (sanitizedBaseUrl) {
@@ -63,11 +70,14 @@ export default function App() {
   }
 
   const openBaseUrlDrawer = async () => {
-    const storedBaseUrl = await AppStorage.getValueFor(BASE_URL_KEY);
+    const storedBaseUrl = await AppStorage.getValue(BASE_URL_KEY);
     setBaseUrlInput((storedBaseUrl || '').trim());
     setIsBaseUrlDrawerVisible(true);
-    //setSelectedLightGroups((prev) => prev.slice(1));
-    //setSelectedIntersection([]);
+  }
+
+  const changeMode = async (newMode) => {
+    setCurrentMode(newMode);
+    await AppStorage.save('mode', newMode);
   }
 
   const initTriggerLines = async () => {
@@ -105,7 +115,7 @@ export default function App() {
         type: Location.LocationActivityType.AutomotiveNavigation,
       },
       async (location) => {
-        const prevLocation = await AppStorage.getValueFor('location');
+        const prevLocation = await AppStorage.getValue('location');
         const prevLocLat = parseFloat(prevLocation.latitude);
         const prevLocLon = parseFloat(prevLocation.longitude);
 
@@ -201,6 +211,7 @@ export default function App() {
               setSelectedIntersection={setSelectedIntersection}
               setSelectedLightGroups={setSelectedLightGroups}
               startPositionStream={startPositionStream}
+              openBaseUrlDrawer={openBaseUrlDrawer}
             />}
             options={{
               title: 'Home',
@@ -225,10 +236,6 @@ export default function App() {
         </Tab.Navigator>
       </NavigationContainer>
 
-      <Pressable style={styles.drawerButton} onPress={openBaseUrlDrawer}>
-        <Text style={styles.drawerButtonText}>⚙</Text>
-      </Pressable>
-
       <Modal
         animationType="slide"
         transparent={true}
@@ -240,6 +247,26 @@ export default function App() {
           onPress={() => setIsBaseUrlDrawerVisible(false)}
         />
         <View style={styles.drawerContainer}>
+          <View style={styles.modeSelector}>
+            <MaterialCommunityIcons
+              color={'black'}
+              name="car"
+              size={40}
+              onPress={() => {
+                console.log("mode car pressed");
+                changeMode(Mode.Cars);
+              }}
+            />
+            <MaterialCommunityIcons
+              color={'black'}
+              name="walk"
+              size={40}
+              onPress={() => {
+                console.log("mode walk pressed");
+                changeMode(Mode.Pedestrians);
+              }}
+            />
+          </View>
           <Text style={styles.drawerTitle}>Set API base_url (https://url:port/api/)</Text>
           <TextInput
             style={styles.baseUrlInput}
@@ -270,22 +297,6 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  drawerButton: {
-    position: 'absolute',
-    top: 38,
-    right: 16,
-    width: 34,
-    height: 34,
-    borderRadius: 22,
-    backgroundColor: '#333',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  drawerButtonText: {
-    fontSize: 24,
-    color: '#fff',
-    marginTop: -2,
-  },
   drawerBackdrop: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.25)',
@@ -294,10 +305,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingHorizontal: 18,
     paddingVertical: 20,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
+    borderRadius: 16,
     borderColor: '#DDD',
     borderWidth: 1,
+    position: 'absolute',
+    top: '40%',
+    left: '50%',
+    transform: [{ translateX: -0.5 * 300 }, { translateY: -0.5 * 200 }],
+    width: 300,
   },
   drawerTitle: {
     fontSize: 18,
@@ -324,6 +339,12 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     backgroundColor: '#ECECEC',
+  },
+  modeSelector: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 40,
+    marginBottom: 20,
   },
   saveButton: {
     backgroundColor: '#222',

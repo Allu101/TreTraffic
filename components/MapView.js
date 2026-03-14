@@ -26,7 +26,7 @@ export default function Map({ intersectionLocations, setSelectedIntersection, se
   }, [intersectionLocations]);
 
   const fetchLocations = async () => {
-    const tempLocation = await AppStorage.getValueFor('location');
+    const tempLocation = await AppStorage.getValue('location');
     setLocation(tempLocation);
   }
 
