@@ -154,7 +154,7 @@ export default function App() {
             if (intersection.liva_nro === selectedIntersection && distance < 30) {
               setSelectedIntersection([]);
             }
-            const nextLightGroupLivaNro = selectedLightGroups?.[0].split(':')[0];
+            const nextLightGroupLivaNro = selectedLightGroups?.[0]?.split(':')[0];
             if (intersection.liva_nro === nextLightGroupLivaNro && distance < 30) {
               setSelectedLightGroups((prev) => prev.slice(1));
             }
