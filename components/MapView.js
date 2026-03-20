@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import MapView, { PROVIDER_GOOGLE, Marker, Polyline } from 'react-native-maps';
 import AppStorage from '../utils/secure-store';
 
-export default function Map({ intersectionLocations, setSelectedIntersection, setSelectedLightGroups, triggerLines }) {
+export default function Map({ currentMode, intersectionLocations, setSelectedIntersection, setSelectedLightGroups, triggerLines }) {
   const [location, setLocation] = useState(null);
   const [markers, setMarkers] = useState([]);
   const [polyLines, setPolyLines] = useState([]);
@@ -23,7 +23,7 @@ export default function Map({ intersectionLocations, setSelectedIntersection, se
   useEffect(() => {
     initMarkers();
     initRouteLines();
-  }, [intersectionLocations]);
+  }, [intersectionLocations, currentMode]);
 
   const fetchLocations = async () => {
     const tempLocation = await AppStorage.getValue('location');
@@ -38,20 +38,18 @@ export default function Map({ intersectionLocations, setSelectedIntersection, se
   function initMarkers() {
     let tempMarkers = [];
     if (intersectionLocations.error) return;
-
     tempMarkers = intersectionLocations.map((intersection) => (
       <Marker
-        key={intersection.id}
+        key={intersection.id + '-' + currentMode}
         coordinate={{
           latitude: intersection.location.latitude,
           longitude: intersection.location.longitude,
         }}
         title={intersection.liva_nro}
         description={intersection.paikka}
-        pinColor={intersection.data_available ? (intersection.hasLightGroups ?
-          (intersection.hasTimeValues ? 'green' : 'yellow') : 'orange') : 'tomato'}
+        pinColor={getMarkerColor(intersection, currentMode)}
         onPress={(e) => {
-          if (intersection.data_available && intersection.hasLightGroups) {
+          if (intersection.data_available && intersection.hasLightGroups.includes(currentMode)) {
             setSelectedIntersection(intersection.liva_nro);
           }
         }}
@@ -64,10 +62,12 @@ export default function Map({ intersectionLocations, setSelectedIntersection, se
   function initRouteLines() {
     let tempRouteLines = [];
     if (triggerLines.error) return;
+
+    const filtered = triggerLines.filter((tl) => tl.mode.includes(currentMode));
     
-    tempRouteLines = triggerLines.map((routeLine, i) => (
+    tempRouteLines = filtered.map((routeLine, i) => (
       <Polyline
-        key={i}
+        key={i + '-' + currentMode}
         coordinates={[
           {latitude: routeLine.location[0].latitude,
             longitude: routeLine.location[0].longitude},
@@ -86,6 +86,14 @@ export default function Map({ intersectionLocations, setSelectedIntersection, se
       />
     ));
     setPolyLines(tempRouteLines);
+  }
+
+  function getMarkerColor(intersection, currentMode) {
+    if (!intersection.data_available) return 'tomato';
+    if (intersection.hasLightGroups.includes(currentMode)) {
+      return intersection.hasTimeValues ? 'green' : 'yellow';
+    }
+    return 'orange';
   }
 
   return (

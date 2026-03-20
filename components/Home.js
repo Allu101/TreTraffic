@@ -10,7 +10,7 @@ const timerInterval = 1000;
 let intersectionTimerId = null;
 let lightGroupTimerId = null;
 
-export default function Home({ intersectionsData, lightGroupsData,
+export default function Home({ currentMode, intersectionsData, lightGroupsData,
     selectedIntersection, selectedLightGroups, setIntersectionsData,
     setLightGroupsData, setSelectedIntersection, setSelectedLightGroups, startPositionStream, openBaseUrlDrawer }) {
 
@@ -27,7 +27,7 @@ export default function Home({ intersectionsData, lightGroupsData,
 			clearInterval(intersectionTimerId);
       clearInterval(lightGroupTimerId);
 		}
-	}, [isFocused]);
+	}, [isFocused, currentMode]);
 
   useEffect(() => {
     if (selectedIntersection == null) return;
@@ -68,7 +68,7 @@ export default function Home({ intersectionsData, lightGroupsData,
   }, [selectedLightGroups]);
 
   const fetchIntersectionData = async () => {
-    let data = await getIntersectionData(selectedIntersection);
+    let data = await getIntersectionData(selectedIntersection, currentMode);
     if (data.error) {
       return;
     }
@@ -80,7 +80,7 @@ export default function Home({ intersectionsData, lightGroupsData,
   }
 
   const fetchLightGroupsData = async () => {
-    let data = await getLightGroupsData(selectedLightGroups);
+    let data = await getLightGroupsData(selectedLightGroups, currentMode);
     if (data.error) {
       return;
     }

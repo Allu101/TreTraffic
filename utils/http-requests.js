@@ -1,9 +1,8 @@
 import axios from "axios";
 import { API_KEY } from '@env';
-import AppStorage from './secure-store';
 
 const DEFAULT_BASE_URL = "http://192.168.0.3:5000/api/";
-//const DEFAULT_BASE_URL = "https://12f4-2001-99a-19d-2900-5d23-645a-259d-2b80.ngrok-free.app/api/";
+//const DEFAULT_BASE_URL = "https://2f07-2001-99a-19d-2900-f9a1-14ff-d2b3-ae64.ngrok-free.app/api/";
 
 const Mode = Object.freeze({
   Cars: 'Cars',
@@ -23,10 +22,6 @@ function setBaseUrlOverride(baseUrl) {
   api.defaults.baseURL = baseUrl || DEFAULT_BASE_URL;
 }
 
-async function getCurrentMode() {
-  return await AppStorage.getValue('mode') || Mode.Cars;
-}
-
 function handleApiError(error, name) {
   const errorRes = {
     error: true,
@@ -38,40 +33,40 @@ function handleApiError(error, name) {
   return errorRes;
 }
 
-async function getAllIntersectionLocations() {
+async function getAllIntersectionLocations(currentMode) {
   try {
-    const response = await api.get(`locations/intersections?mode=${await getCurrentMode()}`);
+    const response = await api.get(`locations/intersections?mode=${currentMode}`);
     return response.data || [];
   } catch (error) {
     return handleApiError(error);
   }
 }
 
-async function getAllTriggerLines() {
+async function getAllTriggerLines(currentMode) {
   try {
-    const response = await api.get(`triggerlines?mode=${await getCurrentMode()}`);
+    const response = await api.get(`triggerlines?mode=${currentMode}`);
     return response.data || [];
   } catch (error) {
     return handleApiError(error, "triggerlines");
   }
 }
 
-async function getIntersectionData(intersection_nro) {
+async function getIntersectionData(intersection_nro, currentMode) {
   try {
     const time = new Date().getTime();
-    const response = await api.get(`intersections/intersection/${intersection_nro}?mode=${await getCurrentMode()}`);
-    console.log(new Date().getTime() - time + ' ms i');
+    const response = await api.get(`intersections/intersection/${intersection_nro}?mode=${currentMode}`);
+    console.log(new Date().getTime() - time + ' ms');
     return response.data || {};
   } catch (error) {
     return handleApiError(error, "intersection data");
   }
 }
 
-async function getLightGroupsData(lightGroups) {
+async function getLightGroupsData(lightGroups, currentMode) {
   try {
     const time = new Date().getTime();
-    const response = await api.get(`intersections/lightgroups/${lightGroups}?mode=${await getCurrentMode()}`);
-    console.log(new Date().getTime() - time + ' ms l');
+    const response = await api.get(`intersections/lightgroups/${lightGroups}?mode=${currentMode}`);
+    console.log(new Date().getTime() - time + ' ms');
     return response.data || {};
   } catch (error) {
     return handleApiError(error, "lightgroups data");

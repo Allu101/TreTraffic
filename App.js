@@ -39,7 +39,7 @@ export default function App() {
     }
     initMode();
     initBaseUrl();
-    initTriggerLines();
+    initLocations();
     fetchGPS();
 
     return () => {
@@ -66,7 +66,7 @@ export default function App() {
     setBaseUrlOverride(sanitizedBaseUrl || null);
     setIsBaseUrlDrawerVisible(false);
 
-    await initTriggerLines();
+    await initLocations();
   }
 
   const openBaseUrlDrawer = async () => {
@@ -76,14 +76,14 @@ export default function App() {
   }
 
   const changeMode = async (newMode) => {
-    setCurrentMode(newMode);
     await AppStorage.save('mode', newMode);
+    setCurrentMode(newMode);
   }
 
-  const initTriggerLines = async () => {
-    const data = await getAllTriggerLines();
+  const initLocations = async () => {
+    const triggerLines = await getAllTriggerLines(currentMode);
     const intersectionLocations = await getAllIntersectionLocations();
-    setTriggerLines(data);
+    setTriggerLines(triggerLines);
     setIntersectionLocations(intersectionLocations);
   }
 
@@ -202,6 +202,7 @@ export default function App() {
           <Tab.Screen
             name={'home'}
             children={() => <Home
+              currentMode={currentMode}
               intersectionsData={intersectionsData}
               lightGroupsData={lightGroupsData}
               selectedIntersection={selectedIntersection}
@@ -222,6 +223,7 @@ export default function App() {
             name={'map'}
             children={() =>
               <Map
+                currentMode={currentMode}
                 intersectionLocations={intersectionLocations}
                 setSelectedIntersection={setSelectedIntersection}
                 setSelectedLightGroups={setSelectedLightGroups}
