@@ -63,7 +63,7 @@ export default function Map({ currentMode, intersectionLocations, setSelectedInt
     let tempRouteLines = [];
     if (triggerLines.error) return;
 
-    const filtered = triggerLines.filter((tl) => tl.mode.includes(currentMode));
+    const filtered = triggerLines;
     
     tempRouteLines = filtered.map((routeLine, i) => (
       <Polyline

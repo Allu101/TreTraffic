@@ -39,7 +39,8 @@ export default function App() {
     }
     initMode();
     initBaseUrl();
-    initLocations();
+    initIntersectionLocations();
+    initTriggerLines();
     fetchGPS();
 
     return () => {
@@ -66,7 +67,7 @@ export default function App() {
     setBaseUrlOverride(sanitizedBaseUrl || null);
     setIsBaseUrlDrawerVisible(false);
 
-    await initLocations();
+    await initIntersectionLocations();
   }
 
   const openBaseUrlDrawer = async () => {
@@ -77,14 +78,18 @@ export default function App() {
 
   const changeMode = async (newMode) => {
     await AppStorage.save('mode', newMode);
+    await initTriggerLines(newMode);
     setCurrentMode(newMode);
   }
 
-  const initLocations = async () => {
-    const triggerLines = await getAllTriggerLines(currentMode);
+  const initIntersectionLocations = async () => {
     const intersectionLocations = await getAllIntersectionLocations();
-    setTriggerLines(triggerLines);
     setIntersectionLocations(intersectionLocations);
+  }
+
+  const initTriggerLines = async (mode = currentMode) => {
+    const triggerLines = await getAllTriggerLines(mode);
+    setTriggerLines(triggerLines);
   }
 
   const fetchGPS = async () => {
