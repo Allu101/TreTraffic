@@ -2,7 +2,10 @@ import axios from "axios";
 import { API_KEY } from '@env';
 
 const DEFAULT_BASE_URL = "http://192.168.0.3:5000/api/";
-//const DEFAULT_BASE_URL = "https://2f07-2001-99a-19d-2900-f9a1-14ff-d2b3-ae64.ngrok-free.app/api/";
+//const DEFAULT_BASE_URL = "https://1b4b-2001-99a-19d-2900-147-4d20-ec3c-130.ngrok-free.app/api/";
+
+const etagCache = new Map();
+const dataCache = new Map();
 
 const Mode = Object.freeze({
   Cars: 'Cars',
@@ -52,10 +55,33 @@ async function getAllTriggerLines(currentMode) {
 }
 
 async function getIntersectionData(intersection_nro, currentMode) {
+  const key = `intersection-${intersection_nro}-${currentMode}`;
+  const etag = etagCache.get(key);
+
   try {
-    const time = new Date().getTime();
-    const response = await api.get(`intersections/intersection/${intersection_nro}?mode=${currentMode}`);
-    console.log(new Date().getTime() - time + ' ms');
+    const time = Date.now();
+
+    const response = await api.get(
+      `intersections/intersection/${intersection_nro}?mode=${currentMode}`,
+      {
+        headers: etag ? { 'If-None-Match': etag } : {},
+        validateStatus: (status) => status === 200 || status === 304,
+      }
+    );
+
+    console.log(Date.now() - time + ' ms ' + response.status);
+
+    if (response.status === 304) {
+      return dataCache.get(key);
+    }
+
+    const newEtag = response.headers.etag;
+    if (newEtag) {
+      etagCache.set(key, newEtag);
+    }
+
+    dataCache.set(key, response.data);
+
     return response.data || {};
   } catch (error) {
     return handleApiError(error, "intersection data");

@@ -5,7 +5,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { getIntersectionData, getLightGroupsData } from '../utils/http-requests';
 
 const iconSize = 70;
-const timerInterval = 1000;
+const timerInterval = 750;
 
 let intersectionTimerId = null;
 let lightGroupTimerId = null;
