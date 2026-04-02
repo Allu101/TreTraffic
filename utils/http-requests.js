@@ -72,7 +72,7 @@ async function getIntersectionData(intersection_nro, currentMode) {
     console.log(Date.now() - time + ' ms ' + response.status);
 
     if (response.status === 304) {
-      return dataCache.get(key);
+      return [dataCache.get(key), response.status];
     }
 
     const newEtag = response.headers.etag;
@@ -82,7 +82,7 @@ async function getIntersectionData(intersection_nro, currentMode) {
 
     dataCache.set(key, response.data);
 
-    return response.data || {};
+    return [response.data || {}, response.status];
   } catch (error) {
     return handleApiError(error, "intersection data");
   }
