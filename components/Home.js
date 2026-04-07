@@ -80,8 +80,8 @@ export default function Home({ currentMode, intersectionsData, lightGroupsData,
   }
 
   const fetchLightGroupsData = async () => {
-    let data = await getLightGroupsData(selectedLightGroups, currentMode);
-    if (data.error) {
+    let [data, statusCode] = await getLightGroupsData(selectedLightGroups, currentMode);
+    if (data.error || statusCode == 304) {
       return;
     }
     if (data == undefined || data.length == 0) {

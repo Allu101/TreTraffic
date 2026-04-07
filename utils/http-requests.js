@@ -89,11 +89,33 @@ async function getIntersectionData(intersection_nro, currentMode) {
 }
 
 async function getLightGroupsData(lightGroups, currentMode) {
+  const key = `lightgroups-${lightGroups}-${currentMode}`;
+  const etag = etagCache.get(key);
+
   try {
-    const time = new Date().getTime();
-    const response = await api.get(`intersections/lightgroups/${lightGroups}?mode=${currentMode}`);
-    console.log(new Date().getTime() - time + ' ms');
-    return response.data || {};
+    const time = Date.now();
+
+    const response = await api.get(
+      `intersections/lightgroups/${lightGroups}?mode=${currentMode}`,
+      {
+        headers: etag ? { 'If-None-Match': etag } : {},
+        validateStatus: (status) => status === 200 || status === 304,
+      }
+    );
+    console.log(Date.now() - time + ' ms l' + response.status);
+
+    if (response.status === 304) {
+      return [dataCache.get(key), response.status];
+    }
+
+    const newEtag = response.headers.etag;
+    if (newEtag) {
+      etagCache.set(key, newEtag);
+    }
+
+    dataCache.set(key, response.data);
+
+    return [response.data || {}, response.status];
   } catch (error) {
     return handleApiError(error, "lightgroups data");
   }
