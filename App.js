@@ -165,7 +165,7 @@ export default function App() {
             );
 
             const nextLightGroupLivaNro = selectedLightGroups?.[0]?.split(':')[0] || 0;
-            if (!reachedIntersection) {
+            if (reachedIntersection < 0) {
               if (intersection.liva_nro === selectedIntersection && distance < INTERSECTION_BYPASS_DISTANCE) {
                 reachedIntersection = intersection.liva_nro;
               }
