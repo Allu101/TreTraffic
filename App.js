@@ -36,14 +36,14 @@ export default function App() {
   const Tab = createBottomTabNavigator();
 
   useEffect(() => {
-    const initMode = async () => {
+    const initAsync = async () => {
       const storedMode = await AppStorage.getValue('mode') || Mode.Cars;
       setCurrentMode(storedMode);
+      await initBaseUrl();
+      initIntersectionLocations();
+      initTriggerLines();
     }
-    initMode();
-    initBaseUrl();
-    initIntersectionLocations();
-    initTriggerLines();
+    initAsync();
 
     return () => {
       if (positionStream) {
@@ -54,7 +54,7 @@ export default function App() {
 
   useEffect(() => {
     fetchGPS();
-  }, [intersectionLocations])
+  }, [intersectionLocations, triggerLines])
 
   const initBaseUrl = async () => {
     const storedBaseUrl = await AppStorage.getValue(BASE_URL_KEY);
