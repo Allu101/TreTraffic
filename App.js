@@ -23,8 +23,6 @@ let reachedIntersection = -1;
 
 export default function App() {
   const [intersectionLocations, setIntersectionLocations] = useState([]);
-  const [intersectionsData, setIntersectionsData] = useState(null);
-  const [lightGroupsData, setLightGroupsData] = useState(null);
   const [selectedIntersection, setSelectedIntersection] = useState([]);
   const [selectedLightGroups, setSelectedLightGroups] = useState([]);
   const [currentMode, setCurrentMode] = useState(Mode.Cars);
@@ -227,12 +225,8 @@ export default function App() {
             name={'home'}
             children={() => <Home
               currentMode={currentMode}
-              intersectionsData={intersectionsData}
-              lightGroupsData={lightGroupsData}
               selectedIntersection={selectedIntersection}
               selectedLightGroups={selectedLightGroups}
-              setIntersectionsData={setIntersectionsData}
-              setLightGroupsData={setLightGroupsData}
               setSelectedIntersection={setSelectedIntersection}
               setSelectedLightGroups={setSelectedLightGroups}
               startPositionStream={startPositionStream}

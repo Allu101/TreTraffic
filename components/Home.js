@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, ScrollView } from 'react-native';
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useIsFocused } from '@react-navigation/native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { getIntersectionData, getLightGroupsData } from '../utils/http-requests';
@@ -10,10 +10,11 @@ const timerInterval = 750;
 let intersectionTimerId = null;
 let lightGroupTimerId = null;
 
-export default function Home({ currentMode, intersectionsData, lightGroupsData,
-    selectedIntersection, selectedLightGroups, setIntersectionsData,
-    setLightGroupsData, setSelectedIntersection, setSelectedLightGroups, startPositionStream, openBaseUrlDrawer }) {
-
+export default function Home({ currentMode, selectedIntersection, selectedLightGroups,
+    setSelectedIntersection, setSelectedLightGroups, startPositionStream, openBaseUrlDrawer }) {
+  
+  const [intersectionsData, setIntersectionsData] = useState(null);
+  const [lightGroupsData, setLightGroupsData] = useState(null);
   const isFocused = useIsFocused();
  
   useEffect(() => {
