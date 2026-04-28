@@ -52,7 +52,7 @@ export default function App() {
 
   useEffect(() => {
     fetchGPS();
-  }, [intersectionLocations, triggerLines])
+  }, [intersectionLocations, triggerLines, reachedIntersection])
 
   const initBaseUrl = async () => {
     const storedBaseUrl = await AppStorage.getValue(BASE_URL_KEY);
@@ -142,8 +142,7 @@ export default function App() {
               console.log(intersects.features.length);
 
               console.log(new Date().toLocaleTimeString() + line.triggers['1'].lightGroups);
-              //check heading
-              console.log(location.coords.heading);
+
               if (location.coords.heading > line.triggers['1'].direction - line.triggers['1'].directionRange &&
                   location.coords.heading < line.triggers['1'].direction + line.triggers['1'].directionRange) {
                 setSelectedLightGroups(line.triggers['1'].lightGroups);
@@ -156,7 +155,36 @@ export default function App() {
         if (intersectionLocations.length > 0) {
           const filteredIntersection = intersectionLocations.filter((i) => i.hasLightGroups?.length > 0);
 
-          filteredIntersection.forEach((intersection) => {
+          const targetIntersection = selectedIntersection.length > 0 ? selectedIntersection : selectedLightGroups?.[0]?.split(':')[0];
+          if (!targetIntersection) return;
+
+          const intersection = filteredIntersection.find(
+            (i) => i.liva_nro === targetIntersection
+          );
+
+          if (!intersection) return;
+
+          const distance = getDistance({ latitude: locLat, longitude: locLon },
+            {
+              latitude: intersection.location.latitude,
+              longitude: intersection.location.longitude,
+            }
+          );
+          
+          if (reachedIntersection < 0 && distance < INTERSECTION_BYPASS_DISTANCE) {
+            reachedIntersection = targetIntersection;
+          }
+
+          else if (reachedIntersection === targetIntersection && distance > INTERSECTION_BYPASS_DISTANCE + 5) {
+            reachedIntersection = -1;
+            if (targetIntersection === selectedIntersection) {
+              setSelectedIntersection([]);
+            } else {
+              setSelectedLightGroups((prev) => prev.slice(1));
+            }
+          }
+
+          /*filteredIntersection.forEach((intersection) => {
             const distance = getDistance(
               { latitude: locLat, longitude: locLon },
               { latitude: intersection.location.latitude, longitude: intersection.location.longitude }
@@ -171,16 +199,16 @@ export default function App() {
                 reachedIntersection = nextLightGroupLivaNro;
               }
             } else {
-              if (reachedIntersection == intersection.liva_nro && distance > INTERSECTION_BYPASS_DISTANCE) {
+              if (reachedIntersection === intersection.liva_nro && distance > INTERSECTION_BYPASS_DISTANCE) {
                 reachedIntersection = -1;
                 setSelectedIntersection([]);
               }
-              if (reachedIntersection == nextLightGroupLivaNro && distance > INTERSECTION_BYPASS_DISTANCE) {
+              if (reachedIntersection === nextLightGroupLivaNro && distance > INTERSECTION_BYPASS_DISTANCE) {
                 reachedIntersection = -1;
                 setSelectedLightGroups((prev) => prev.slice(1));
               }
             }
-          });
+          });*/
         }
 
         await AppStorage.save(
