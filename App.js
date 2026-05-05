@@ -1,5 +1,3 @@
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { NavigationContainer } from '@react-navigation/native';
 import React, { useEffect, useState } from "react";
 import { StatusBar } from 'expo-status-bar';
 import * as Location from 'expo-location';
@@ -30,8 +28,6 @@ export default function App() {
   const [triggerLines, setTriggerLines] = useState([]);
   const [isBaseUrlDrawerVisible, setIsBaseUrlDrawerVisible] = useState(false);
   const [baseUrlInput, setBaseUrlInput] = useState('');
-
-  const Tab = createBottomTabNavigator();
 
   useEffect(() => {
     const initAsync = async () => {
@@ -222,67 +218,24 @@ export default function App() {
   }
 
   return (
-    <SafeAreaView edges={['bottom', 'top']} style={{ flex: 1 }}>
-      <NavigationContainer independent={true}>
-        <StatusBar style="light" />
-        <Tab.Navigator
-          initialRouteName={'home'}
-          screenOptions={{
-            tabBarActiveBackgroundColor: '#111',
-            tabBarInactiveBackgroundColor: '#222',
-            tabBarActiveTintColor: '#FEE',
-            tabBarInactiveTintColor: '#777',
-            tabBarLabelStyle: {
-              fontSize: 25,
-              marginBottom: 12,
-            },
-            tabBarStyle: {
-              height: 60,
-            },
-            headerTitleStyle: {
-              color: '#111'
-            },
-            headerBackgroundContainerStyle: {
-              backgroundColor: '#AAA',
-              alignItems: 'center',
-            },
-            headerShown: false,
-          }}
-        >
-          <Tab.Screen
-            name={'home'}
-            children={() => <Home
-              currentMode={currentMode}
-              selectedIntersection={selectedIntersection}
-              selectedLightGroups={selectedLightGroups}
-              setSelectedIntersection={setSelectedIntersection}
-              setSelectedLightGroups={setSelectedLightGroups}
-              startPositionStream={startPositionStream}
-              openBaseUrlDrawer={openBaseUrlDrawer}
-            />}
-            options={{
-              title: 'Home',
-              tabBarIconStyle: { display: "none" }
-            }}
-          />
-          <Tab.Screen
-            name={'map'}
-            children={() =>
-              <Map
-                currentMode={currentMode}
-                intersectionLocations={intersectionLocations}
-                setSelectedIntersection={setSelectedIntersection}
-                setSelectedLightGroups={setSelectedLightGroups}
-                triggerLines={triggerLines}
-              />}
-            options={{
-              title: 'Map',
-              tabBarIconStyle: { display: "none" }
-            }}
-
-          />
-        </Tab.Navigator>
-      </NavigationContainer>
+    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: 'white' }}>
+      <StatusBar style="dark" />
+      <Home
+        currentMode={currentMode}
+        selectedIntersection={selectedIntersection}
+        selectedLightGroups={selectedLightGroups}
+        setSelectedIntersection={setSelectedIntersection}
+        setSelectedLightGroups={setSelectedLightGroups}
+        startPositionStream={startPositionStream}
+        openBaseUrlDrawer={openBaseUrlDrawer}
+      />
+      <Map
+        currentMode={currentMode}
+        intersectionLocations={intersectionLocations}
+        setSelectedIntersection={setSelectedIntersection}
+        setSelectedLightGroups={setSelectedLightGroups}
+        triggerLines={triggerLines}
+      />
 
       <Modal
         animationType="slide"

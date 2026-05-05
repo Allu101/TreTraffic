@@ -1,6 +1,5 @@
 import { StyleSheet, Text, View, ScrollView } from 'react-native';
 import React, { useEffect, useState } from "react";
-import { useIsFocused } from '@react-navigation/native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { getIntersectionData, getLightGroupsData } from '../utils/http-requests';
 
@@ -15,20 +14,19 @@ export default function Home({ currentMode, selectedIntersection, selectedLightG
   
   const [intersectionsData, setIntersectionsData] = useState(null);
   const [lightGroupsData, setLightGroupsData] = useState(null);
-  const isFocused = useIsFocused();
  
   useEffect(() => {
     if (selectedIntersection.length > 0) {
-		  restartIntersectionTimer(isFocused);
+		  restartIntersectionTimer();
     }
     if (selectedLightGroups.length > 0) {
-      restartLightGroupTimer(isFocused);
+      restartLightGroupTimer();
     }
 		return () => {
 			clearInterval(intersectionTimerId);
       clearInterval(lightGroupTimerId);
 		}
-	}, [isFocused, currentMode]);
+	}, [currentMode]);
 
   useEffect(() => {
     if (selectedIntersection == null) return;
@@ -39,12 +37,9 @@ export default function Home({ currentMode, selectedIntersection, selectedLightG
     }
     if (selectedLightGroups.length > 0) {
       setSelectedLightGroups([]);
-      return;
     }
 
-    if (isFocused) {
-      restartIntersectionTimer(true);
-    }
+    restartIntersectionTimer();
     startPositionStream();
     fetchIntersectionData();
   }, [selectedIntersection]);
@@ -58,12 +53,9 @@ export default function Home({ currentMode, selectedIntersection, selectedLightG
     }
     if (selectedIntersection.length > 0) {
       setSelectedIntersection([]);
-      return;
     }
 
-    if (isFocused) {
-      restartLightGroupTimer(true);
-    }
+    restartLightGroupTimer();
     startPositionStream();
     fetchLightGroupsData();
   }, [selectedLightGroups]);
@@ -92,32 +84,24 @@ export default function Home({ currentMode, selectedIntersection, selectedLightG
     setLightGroupsData(data);
   }
 
-  const restartIntersectionTimer = (isFocused) => {
-		if (isFocused) {
+  const restartIntersectionTimer = () => {
+    fetchIntersectionData();
+    if (intersectionTimerId) {
+      clearInterval(intersectionTimerId);
+    }
+    intersectionTimerId = setInterval(() => {
       fetchIntersectionData();
-      if (intersectionTimerId) {
-        clearInterval(intersectionTimerId);
-      }
-			intersectionTimerId = setInterval(() => {
-				fetchIntersectionData();
-			}, timerInterval);
-		} else {
-			clearInterval(intersectionTimerId);
-		}
+    }, timerInterval);
 	}
 
-  const restartLightGroupTimer = (isFocused) => {
-		if (isFocused) {
+  const restartLightGroupTimer = () => {
+    fetchLightGroupsData();
+    if (lightGroupTimerId) {
+      clearInterval(lightGroupTimerId);
+    }
+    lightGroupTimerId = setInterval(() => {
       fetchLightGroupsData();
-      if (lightGroupTimerId) {
-        clearInterval(lightGroupTimerId);
-      }
-			lightGroupTimerId = setInterval(() => {
-				fetchLightGroupsData();
-			}, timerInterval);
-		} else {
-			clearInterval(lightGroupTimerId);
-		}
+    }, timerInterval);
 	}
 
   const showSelectedGroups = () => {
@@ -135,7 +119,7 @@ export default function Home({ currentMode, selectedIntersection, selectedLightG
           <View key={'lights' + key} style={styles.lights}>
             {group.lights.map((light, index) => {
               return (
-                <View key={'light' + index} style={styles.light}>
+                <View key={'light' + light.id} style={styles.light}>
                   {getColoredDirectionIcon(light.type, light.state)}
                   <Text style={styles.text}>{light.state}</Text>
                   <Text style={styles.secondsText}>
@@ -219,7 +203,7 @@ export default function Home({ currentMode, selectedIntersection, selectedLightG
         }}
       />
     </View>
-    <ScrollView >
+    <ScrollView style={{maxHeight: 540}} >
       {showSelectedGroups()}
     </ScrollView>
     </>

@@ -59,7 +59,7 @@ async function getIntersectionData(intersection_nro, currentMode) {
   const etag = etagCache.get(key);
 
   try {
-    const time = Date.now();
+    //const time = Date.now();
 
     const response = await api.get(
       `intersections/intersection/${intersection_nro}?mode=${currentMode}`,
@@ -69,7 +69,7 @@ async function getIntersectionData(intersection_nro, currentMode) {
       }
     );
 
-    console.log(Date.now() - time + ' ms ' + response.status);
+    //console.log(Date.now() - time + ' ms ' + response.status + ": " + response.headers['content-length']);
 
     if (response.status === 304) {
       return [dataCache.get(key), response.status];
@@ -93,7 +93,7 @@ async function getLightGroupsData(lightGroups, currentMode) {
   const etag = etagCache.get(key);
 
   try {
-    const time = Date.now();
+    //const time = Date.now();
 
     const response = await api.get(
       `intersections/lightgroups/${lightGroups}?mode=${currentMode}`,
@@ -102,7 +102,7 @@ async function getLightGroupsData(lightGroups, currentMode) {
         validateStatus: (status) => status === 200 || status === 304,
       }
     );
-    console.log(Date.now() - time + ' ms l' + response.status);
+    //console.log(Date.now() - time + ' ms l' + response.status);
 
     if (response.status === 304) {
       return [dataCache.get(key), response.status];
