@@ -11,7 +11,7 @@
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
     "@turf/line-intersect": "^7.2.0",
-    "axios": "^1.15.0",
+    "axios": "^1.15.2",
     "expo": "~53.0.27",
     "expo-asset": "~11.1.7",
     "expo-dev-client": "~5.2.4",
