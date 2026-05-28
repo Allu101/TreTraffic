@@ -14,7 +14,7 @@ import { Mode, getAllTriggerLines, getAllIntersectionLocations,
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const BASE_URL_KEY = 'base_url';
-const INTERSECTION_BYPASS_DISTANCE = 35;
+const INTERSECTION_BYPASS_DISTANCE = 33;
 
 let positionStream = null;
 let reachedIntersection = -1;
@@ -42,9 +42,7 @@ export default function App() {
     initAsync();
 
     return () => {
-      if (positionStream) {
-        positionStream.remove();
-      }
+      positionStream?.remove();
     }
   }, []);
 
@@ -114,7 +112,7 @@ export default function App() {
 
   const startPositionStream = async () => {
     if (positionStream) {
-      positionStream.remove();
+      positionStream?.remove();
     }
     positionStream = await Location.watchPositionAsync(
       {
@@ -156,9 +154,7 @@ export default function App() {
           const targetIntersection = selectedIntersection.length > 0 ? selectedIntersection : selectedLightGroups?.[0]?.split(':')[0];
           if (!targetIntersection) return;
 
-          const intersection = filteredIntersection.find(
-            (i) => i.liva_nro === targetIntersection
-          );
+          const intersection = filteredIntersection.find((i) =>i.liva_nro === targetIntersection);
 
           if (!intersection) return;
 
@@ -181,32 +177,6 @@ export default function App() {
               setSelectedLightGroups((prev) => prev.slice(1));
             }
           }
-
-          /*filteredIntersection.forEach((intersection) => {
-            const distance = getDistance(
-              { latitude: locLat, longitude: locLon },
-              { latitude: intersection.location.latitude, longitude: intersection.location.longitude }
-            );
-
-            const nextLightGroupLivaNro = selectedLightGroups?.[0]?.split(':')[0] || 0;
-            if (reachedIntersection < 0) {
-              if (intersection.liva_nro === selectedIntersection && distance < INTERSECTION_BYPASS_DISTANCE) {
-                reachedIntersection = intersection.liva_nro;
-              }
-              if (intersection.liva_nro === nextLightGroupLivaNro && distance < INTERSECTION_BYPASS_DISTANCE) {
-                reachedIntersection = nextLightGroupLivaNro;
-              }
-            } else {
-              if (reachedIntersection === intersection.liva_nro && distance > INTERSECTION_BYPASS_DISTANCE) {
-                reachedIntersection = -1;
-                setSelectedIntersection([]);
-              }
-              if (reachedIntersection === nextLightGroupLivaNro && distance > INTERSECTION_BYPASS_DISTANCE) {
-                reachedIntersection = -1;
-                setSelectedLightGroups((prev) => prev.slice(1));
-              }
-            }
-          });*/
         }
 
         setLocation(location);

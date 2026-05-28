@@ -1,10 +1,10 @@
-import { StyleSheet, Text, View, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, Dimensions } from 'react-native';
 import React, { useEffect, useState } from "react";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { getIntersectionData, getLightGroupsData } from '../utils/http-requests';
 
-const iconSize = 70;
-const timerInterval = 750;
+const iconSize = 55;
+const timerInterval = 700;
 
 let intersectionTimerId = null;
 let lightGroupTimerId = null;
@@ -60,28 +60,20 @@ export default function Home({ currentMode, selectedIntersection, selectedLightG
     fetchLightGroupsData();
   }, [selectedLightGroups]);
 
+  const applyFetchResult = (data, statusCode, setData, clearSelection) => {
+    if (data?.error || statusCode === 304) return;
+    if (!data?.length) { clearSelection([]); return; }
+    setData(data);
+  };
+
   const fetchIntersectionData = async () => {
     let [data, statusCode] = await getIntersectionData(selectedIntersection, currentMode);
-    if (data.error || statusCode == 304) {
-      return;
-    }
-    if (data == undefined || data.length == 0) {
-      setSelectedIntersection([]);
-      return;
-    }
-    setIntersectionsData(data);
+    applyFetchResult(data, statusCode, setIntersectionsData, setSelectedIntersection);
   }
 
   const fetchLightGroupsData = async () => {
     let [data, statusCode] = await getLightGroupsData(selectedLightGroups, currentMode);
-    if (data.error || statusCode == 304) {
-      return;
-    }
-    if (data == undefined || data.length == 0) {
-      setSelectedLightGroups([]);
-      return;
-    }
-    setLightGroupsData(data);
+    applyFetchResult(data, statusCode, setLightGroupsData, setSelectedLightGroups);
   }
 
   const restartIntersectionTimer = () => {
@@ -122,8 +114,7 @@ export default function Home({ currentMode, selectedIntersection, selectedLightG
                 <View key={'light' + light.id} style={styles.light}>
                   {getColoredDirectionIcon(light.type, light.state)}
                   <Text style={styles.text}>{light.state}</Text>
-                  <Text style={styles.secondsText}>
-                    {light.currentTime}s/{light.estimatedChangeTime}s</Text>
+                  <Text style={styles.secondsText}>{light.currentTime}s/{light.estimatedChangeTime}s</Text>
                 </View>
               )
             })}
@@ -144,42 +135,15 @@ export default function Home({ currentMode, selectedIntersection, selectedLightG
     return null;
   }
 
-  const getColoredDirectionIcon = (type, state) => {
-    switch (type) {
-      case '0':
-        return (
-          <MaterialCommunityIcons
-            color={getStateColor(state)}
-            name="walk"
-            size={iconSize} 
-          />
-        );
-      case '1':
-        return (
-          <MaterialCommunityIcons
-            color={getStateColor(state)}
-            name="arrow-left-circle"
-            size={iconSize} 
-          />
-        );
-      case '2':
-        return (
-          <MaterialCommunityIcons
-            color={getStateColor(state)}
-            name="arrow-up-circle"
-            size={iconSize} 
-          />
-        );
-      case '3':
-        return (
-          <MaterialCommunityIcons
-            color={getStateColor(state)}
-            name="arrow-right-circle"
-            size={iconSize} 
-          />
-        );
-    }
-  }
+  const TYPE_ICON = { '0': 'walk', '1': 'arrow-left-circle', '2': 'arrow-up-circle', '3': 'arrow-right-circle' };
+
+  const getColoredDirectionIcon = (type, state) => (
+    <MaterialCommunityIcons
+      color={getStateColor(state)}
+      name={TYPE_ICON[type]}
+      size={iconSize}
+    />
+  );
 
   const getStateColor = (state) => {
     if ('ABDEFGH9'.includes(state)) return 'red';
@@ -203,7 +167,7 @@ export default function Home({ currentMode, selectedIntersection, selectedLightG
         }}
       />
     </View>
-    <ScrollView style={{maxHeight: 540}} >
+    <ScrollView style={{height: 350}} >
       {showSelectedGroups()}
     </ScrollView>
     </>
@@ -228,19 +192,20 @@ const styles = StyleSheet.create({
     borderTopWidth: 0,
   },
   light: {
-    marginHorizontal: '2%',
+    marginHorizontal: 5,
     alignItems: 'center',
+    width: Dimensions.get('window').width * 0.33,
   },
   lights: {
     marginBottom: 10,
     flexDirection: 'row',
   },
   secondsText: {
-    fontSize: 28,
+    fontSize: 24,
     textAlign: 'center',
   },
   text: {
-    fontSize: 20,
+    fontSize: 15,
     textAlign: 'center',
   }
 });
