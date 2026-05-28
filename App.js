@@ -29,6 +29,8 @@ export default function App() {
   const [isBaseUrlDrawerVisible, setIsBaseUrlDrawerVisible] = useState(false);
   const [baseUrlInput, setBaseUrlInput] = useState('');
 
+  const [location, setLocation] = useState(null);
+
   useEffect(() => {
     const initAsync = async () => {
       const storedMode = await AppStorage.getValue('mode') || Mode.Cars;
@@ -207,6 +209,7 @@ export default function App() {
           });*/
         }
 
+        setLocation(location);
         await AppStorage.save(
           'location',
           `${location.coords.latitude},
@@ -232,6 +235,7 @@ export default function App() {
       <Map
         currentMode={currentMode}
         intersectionLocations={intersectionLocations}
+        location={location}
         setSelectedIntersection={setSelectedIntersection}
         setSelectedLightGroups={setSelectedLightGroups}
         triggerLines={triggerLines}

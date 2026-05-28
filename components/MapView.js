@@ -1,12 +1,14 @@
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import React, { useEffect, useState, useRef } from 'react';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import MapView, { PROVIDER_GOOGLE, Marker, Polyline } from 'react-native-maps';
 import AppStorage from '../utils/secure-store';
 
-export default function Map({ currentMode, intersectionLocations, setSelectedIntersection, setSelectedLightGroups, triggerLines }) {
-  const [location, setLocation] = useState(null);
+export default function Map({ currentMode, intersectionLocations, location,
+    setSelectedIntersection, setSelectedLightGroups, triggerLines }) {
   const [markers, setMarkers] = useState([]);
   const [polyLines, setPolyLines] = useState([]);
+  const [followsUser, setFollowsUser] = useState(true);
   const mapViewRef = useRef(null);
 
   const initialRegion = {
@@ -17,22 +19,23 @@ export default function Map({ currentMode, intersectionLocations, setSelectedInt
   };
 
   useEffect(() => {
-    fetchLocations();
-  }, []);
-
-  useEffect(() => {
     initMarkers();
     initRouteLines();
   }, [intersectionLocations, currentMode]);
 
-  const fetchLocations = async () => {
-    const tempLocation = await AppStorage.getValue('location');
-    setLocation(tempLocation);
-  }
+  useEffect(() => {
+    if (followsUser) {
+      animateCameraToUserLocation();
+    }
+  }, [followsUser, location]);
 
-  function initLocation() {
-    mapViewRef.current.animateCamera(
-      { center: initialRegion, zoom: 12 }, { duration: 900 });
+  function animateCameraToUserLocation() {
+    if (location != null && mapViewRef.current) {
+      mapViewRef.current.animateCamera(
+        { center: { latitude: parseFloat(location?.coords?.latitude), longitude: parseFloat(location?.coords?.longitude) }, zoom: 15 },
+        { duration: 800 }
+      );
+    }
   }
 
   function initMarkers() {
@@ -105,21 +108,29 @@ export default function Map({ currentMode, intersectionLocations, setSelectedInt
         showsMyLocationButton={false}
         style={styles.map}
         provider={PROVIDER_GOOGLE}
-        onMapLoaded={() => initLocation()}
+        onPanDrag={() => setFollowsUser(false)} 
         initialCamera={{
           center: {
-            latitude: location != null ? parseFloat(location.latitude) : 61.49,
-            longitude: location != null ? parseFloat(location.longitude) : 23.79,
+            latitude: 61.49,
+            longitude: 23.79,
           },
           pitch: 0,
           heading: 0,
-          zoom: 11,
+          zoom: 12,
           altitude: 35000,
         }}
       >
         {markers}
         {polyLines}
       </MapView>
+      {!followsUser && (
+        <TouchableOpacity
+          style={styles.recenterButton}
+          onPress={() => setFollowsUser(true)}
+        >
+          <MaterialCommunityIcons name="crosshairs-gps" size={24} color="black" />
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -133,5 +144,17 @@ const styles = StyleSheet.create({
   map: {
     width: '100%',
     height: '100%',
+  },
+  recenterButton: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    backgroundColor: 'white',
+    borderRadius: 28,
+    padding: 10,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
   },
 });
