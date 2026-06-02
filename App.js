@@ -3,13 +3,13 @@ import { StatusBar } from 'expo-status-bar';
 import * as Location from 'expo-location';
 import { lineString } from "@turf/helpers";
 import { lineIntersect } from "@turf/line-intersect";
-import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { getDistance } from 'geolib';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import AppStorage from './utils/secure-store';
 import Home from './components/Home';
 import Map from './components/MapView';
-import { Mode, getAllTriggerLines, getAllIntersectionLocations,
+import { Mode, getAllTriggerLines, getAllIntersectionLocations, handleGoogleLogin,
   setBaseUrlOverride } from './utils/http-requests';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -30,6 +30,7 @@ export default function App() {
   const [baseUrlInput, setBaseUrlInput] = useState('');
 
   const [location, setLocation] = useState(null);
+  const [googleUserInfo, setGoogleUserInfo] = useState(null);
 
   useEffect(() => {
     const initAsync = async () => {
@@ -265,6 +266,14 @@ export default function App() {
               <Text style={styles.saveButtonText}>Save</Text>
             </Pressable>
           </View>
+          <TouchableOpacity style={{ marginTop: 20, alignSelf: 'center' }} onPress={async () => {
+            const googleData = await handleGoogleLogin();
+            if (!googleData.error) {
+              setGoogleUserInfo(googleData);
+            }
+          }}>
+            <Text>Sign in with Google</Text>
+          </TouchableOpacity>
         </View>
       </Modal>
     </SafeAreaView>

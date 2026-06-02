@@ -1,8 +1,13 @@
 import axios from "axios";
-import { API_KEY } from '@env';
+import { API_KEY, GOOGLE_WEB_CLIENT_ID } from '@env';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 const DEFAULT_BASE_URL = "http://192.168.0.3:5000/api/";
 //const DEFAULT_BASE_URL = "https://1b4b-2001-99a-19d-2900-147-4d20-ec3c-130.ngrok-free.app/api/";
+
+GoogleSignin.configure({
+  webClientId: GOOGLE_WEB_CLIENT_ID,
+});
 
 const etagCache = new Map();
 const dataCache = new Map();
@@ -121,11 +126,30 @@ async function getLightGroupsData(lightGroups, currentMode) {
   }
 }
 
+async function handleGoogleLogin() {
+  try {
+    await GoogleSignin.hasPlayServices();
+    const userInfo = await GoogleSignin.signIn();
+    
+    const idToken = userInfo.data?.idToken;
+    if (!idToken) {
+      throw new Error('No idToken');
+    }
+
+    const response = await api.post('auth/google', { idToken });
+
+    return response.data;
+  } catch (e) {
+    console.log(e);
+  }
+}
+
 export {
   Mode,
 	getAllIntersectionLocations,
   getAllTriggerLines,
   getIntersectionData,
   getLightGroupsData,
+  handleGoogleLogin,
   setBaseUrlOverride,
 };
