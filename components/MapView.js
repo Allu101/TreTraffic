@@ -52,7 +52,7 @@ export default function Map({ currentMode, intersectionLocations, location,
         description={intersection.paikka}
         pinColor={getMarkerColor(intersection, currentMode)}
         onPress={(e) => {
-          if (intersection.data_available && intersection.hasLightGroups.includes(currentMode)) {
+          if (intersection.supportLevel >= 3 && intersection.supportedGroups.includes(currentMode)) {
             setSelectedIntersection(intersection.liva_nro);
           }
         }}
@@ -92,11 +92,23 @@ export default function Map({ currentMode, intersectionLocations, location,
   }
 
   function getMarkerColor(intersection, currentMode) {
-    if (!intersection.data_available) return 'tomato';
-    if (intersection.hasLightGroups.includes(currentMode)) {
-      return intersection.hasTimeValues ? 'green' : 'yellow';
+    if (intersection.supportLevel >= 10) {
+      return 'gold';
     }
-    return 'orange';
+
+    if (intersection.supportLevel >= 5) {
+      return 'green';
+    }
+
+    if (intersection.supportLevel >= 3 && intersection.supportedGroups.includes(currentMode)) {
+      return 'orange';
+    }
+
+    if (intersection.supportLevel >= 1) {
+      return 'orange';
+    }
+
+    return 'tomato';
   }
 
   return (
