@@ -1,63 +1,70 @@
 import { StyleSheet, Text, View, ScrollView, Dimensions } from 'react-native';
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { getIntersectionData, getLightGroupsData } from '../utils/http-requests';
 
 const iconSize = 55;
 const timerInterval = 700;
 
-let intersectionTimerId = null;
-let lightGroupTimerId = null;
-
 export default function Home({ currentMode, selectedIntersection, selectedLightGroups,
     setSelectedIntersection, setSelectedLightGroups, startPositionStream, openBaseUrlDrawer }) {
   
   const [intersectionsData, setIntersectionsData] = useState(null);
   const [lightGroupsData, setLightGroupsData] = useState(null);
+
+  const intersectionTimerRef = useRef(null);
+  const lightGroupTimerRef = useRef(null);
+
+
+  const stopTimer = (ref) => {
+    clearInterval(ref.current);
+    ref.current = null;
+  };
+
+  const startTimer = (ref, fn) => {
+    stopTimer(ref);
+    ref.current = setInterval(fn, timerInterval);
+  };
  
   useEffect(() => {
-    if (selectedIntersection.length > 0) {
-		  restartIntersectionTimer();
+    if (selectedIntersection?.length > 0) {
+		  fetchIntersectionData();
+      startTimer(intersectionTimerRef, fetchIntersectionData);
     }
-    if (selectedLightGroups.length > 0) {
-      restartLightGroupTimer();
+    if (selectedLightGroups?.length > 0) {
+      fetchLightGroupsData();
+      startTimer(lightGroupTimerRef, fetchLightGroupsData);
     }
 		return () => {
-			clearInterval(intersectionTimerId);
-      clearInterval(lightGroupTimerId);
+			stopTimer(intersectionTimerRef);
+      stopTimer(lightGroupTimerRef);
 		}
 	}, [currentMode]);
 
   useEffect(() => {
     if (selectedIntersection == null) return;
 
-    if (selectedIntersection.length == 0) {
-      clearInterval(intersectionTimerId);
-      return;
-    }
-    if (selectedLightGroups.length > 0) {
-      setSelectedLightGroups([]);
+    if (!selectedIntersection.length) {
+      stopTimer(intersectionTimerRef); return;
     }
 
-    restartIntersectionTimer();
-    startPositionStream();
+    setSelectedLightGroups([]);
     fetchIntersectionData();
+    startTimer(intersectionTimerRef, fetchIntersectionData);
+    startPositionStream();
   }, [selectedIntersection]);
 
   useEffect(() => {
     if (selectedLightGroups == null) return;
 
-    if (selectedLightGroups.length == 0) {
-      clearInterval(lightGroupTimerId);
-      return;
-    }
-    if (selectedIntersection.length > 0) {
-      setSelectedIntersection([]);
+    if (!selectedLightGroups.length) {
+      stopTimer(lightGroupTimerRef); return;
     }
 
-    restartLightGroupTimer();
-    startPositionStream();
+    setSelectedIntersection([]);
     fetchLightGroupsData();
+    startTimer(lightGroupTimerRef, fetchLightGroupsData);
+    startPositionStream();
   }, [selectedLightGroups]);
 
   const applyFetchResult = (data, statusCode, setData, clearSelection) => {
@@ -75,26 +82,6 @@ export default function Home({ currentMode, selectedIntersection, selectedLightG
     let [data, statusCode] = await getLightGroupsData(selectedLightGroups, currentMode);
     applyFetchResult(data, statusCode, setLightGroupsData, setSelectedLightGroups);
   }
-
-  const restartIntersectionTimer = () => {
-    fetchIntersectionData();
-    if (intersectionTimerId) {
-      clearInterval(intersectionTimerId);
-    }
-    intersectionTimerId = setInterval(() => {
-      fetchIntersectionData();
-    }, timerInterval);
-	}
-
-  const restartLightGroupTimer = () => {
-    fetchLightGroupsData();
-    if (lightGroupTimerId) {
-      clearInterval(lightGroupTimerId);
-    }
-    lightGroupTimerId = setInterval(() => {
-      fetchLightGroupsData();
-    }, timerInterval);
-	}
 
   const showSelectedGroups = () => {
     const selectedData = getSelectedData();

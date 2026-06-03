@@ -6,18 +6,24 @@ import { lineIntersect } from "@turf/line-intersect";
 import { Modal, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { getDistance } from 'geolib';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import AppStorage from './utils/secure-store';
 import Home from './components/Home';
 import Map from './components/MapView';
 import { Mode, getAllTriggerLines, getAllIntersectionLocations, handleGoogleLogin,
   setBaseUrlOverride } from './utils/http-requests';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { GOOGLE_WEB_CLIENT_ID } from '@env';
 
 const BASE_URL_KEY = 'base_url';
 const INTERSECTION_BYPASS_DISTANCE = 33;
 
 let positionStream = null;
 let reachedIntersection = -1;
+
+GoogleSignin.configure({
+  webClientId: GOOGLE_WEB_CLIENT_ID,
+});
 
 export default function App() {
   const [intersectionLocations, setIntersectionLocations] = useState([]);
@@ -50,6 +56,16 @@ export default function App() {
   useEffect(() => {
     fetchGPS();
   }, [intersectionLocations, triggerLines, reachedIntersection])
+
+  const googleSignOut = () => {
+    GoogleSignin.signOut()
+      .then(() => {
+        setGoogleUserInfo(null);
+      })
+      .catch((error) => {
+        console.log("Google sign-out error:", error);
+      });
+  }
 
   const initBaseUrl = async () => {
     const storedBaseUrl = await AppStorage.getValue(BASE_URL_KEY);
@@ -266,14 +282,30 @@ export default function App() {
               <Text style={styles.saveButtonText}>Save</Text>
             </Pressable>
           </View>
-          <TouchableOpacity style={{ marginTop: 20, alignSelf: 'center' }} onPress={async () => {
-            const googleData = await handleGoogleLogin();
-            if (!googleData.error) {
-              setGoogleUserInfo(googleData);
-            }
-          }}>
-            <Text>Sign in with Google</Text>
-          </TouchableOpacity>
+          <View style={{ marginTop: 20, alignSelf: 'center', alignItems: 'center' }}>
+            {!googleUserInfo && (
+              <TouchableOpacity style={{ marginTop: 10, padding: 10, backgroundColor: '#ECECEC', borderRadius: 8 }} onPress={() => {
+                handleGoogleLogin(GoogleSignin).then((googleData) => {
+                  if (!googleData.error) {
+                    setGoogleUserInfo(googleData);
+                  }
+              }).catch((error) => {
+                console.log("Google login error:", error);
+              });
+            }}>
+              <Text>Sign in with Google</Text>
+            </TouchableOpacity>)}
+            {googleUserInfo && (
+              <>
+                <Text>Signed in as:</Text>
+                <Text>{googleUserInfo.user.name}</Text>
+                <Text>{googleUserInfo.user.email}</Text>
+                <TouchableOpacity style={{ marginTop: 10, padding: 10, backgroundColor: '#ECECEC', borderRadius: 8 }} onPress={googleSignOut}>
+                  <Text>Sign out</Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
         </View>
       </Modal>
     </SafeAreaView>
