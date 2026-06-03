@@ -16,7 +16,7 @@
       "bundleIdentifier": "com.allu.tretraffic",
       "supportsTablet": true,
       "config": {
-        "googleMapsApiKey": "AIzaSyD8XnCt9cwlbcDdpxsRUYpF2VHcyJ__AEI"
+        "googleMapsApiKey": "EXPO_PUBLIC_GOOGLE_MAPS_API_KEY"
       }
     },
     "android": {
@@ -28,7 +28,7 @@
       "package": "com.allu.tretraffic",
       "config": {
         "googleMaps": {
-          "apiKey": "AIzaSyD8XnCt9cwlbcDdpxsRUYpF2VHcyJ__AEI"
+          "apiKey": "EXPO_PUBLIC_GOOGLE_MAPS_API_KEY"
         }
       }
     },
