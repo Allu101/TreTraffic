@@ -4,7 +4,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { getIntersectionData, getLightGroupsData } from '../utils/http-requests';
 
 const iconSize = 55;
-const timerInterval = 700;
+const timerInterval = 650;
 
 export default function Home({ currentMode, selectedIntersection, selectedLightGroups,
     setSelectedIntersection, setSelectedLightGroups, startPositionStream, openBaseUrlDrawer }) {
@@ -154,7 +154,7 @@ export default function Home({ currentMode, selectedIntersection, selectedLightG
         }}
       />
     </View>
-    <ScrollView style={{height: 350}} >
+    <ScrollView style={{height: 300}} >
       {showSelectedGroups()}
     </ScrollView>
     </>
@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   secondsText: {
-    fontSize: 24,
+    fontSize: 23,
     textAlign: 'center',
   },
   text: {

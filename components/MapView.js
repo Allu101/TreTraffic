@@ -101,7 +101,7 @@ export default function Map({ currentMode, intersectionLocations, location,
     }
 
     if (intersection.supportLevel >= 3 && intersection.supportedGroups.includes(currentMode)) {
-      return 'orange';
+      return 'yellow';
     }
 
     if (intersection.supportLevel >= 1) {
