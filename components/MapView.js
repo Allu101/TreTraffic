@@ -92,16 +92,18 @@ export default function Map({ currentMode, intersectionLocations, location,
   }
 
   function getMarkerColor(intersection, currentMode) {
-    if (intersection.supportLevel >= 10) {
-      return 'gold';
-    }
+    if (intersection.supportedGroups?.includes(currentMode)) {
+      if (intersection.supportLevel >= 10) {
+        return 'gold';
+      }
 
-    if (intersection.supportLevel >= 5) {
-      return 'green';
-    }
+      if (intersection.supportLevel >= 5) {
+        return 'green';
+      }
 
-    if (intersection.supportLevel >= 3 && intersection.supportedGroups.includes(currentMode)) {
-      return 'yellow';
+      if (intersection.supportLevel >= 3) {
+        return 'yellow';
+      }
     }
 
     if (intersection.supportLevel >= 1) {
