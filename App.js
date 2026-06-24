@@ -212,6 +212,7 @@ export default function App() {
       <StatusBar style="dark" />
       <Home
         currentMode={currentMode}
+        changeMode={changeMode}
         selectedIntersection={selectedIntersection}
         selectedLightGroups={selectedLightGroups}
         setSelectedIntersection={setSelectedIntersection}
