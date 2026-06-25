@@ -1,5 +1,4 @@
 import axios from "axios";
-import { API_KEY } from '@env';
 
 const DEFAULT_BASE_URL = "http://192.168.0.3:5000/api/";
 //const DEFAULT_BASE_URL = "https://1b4b-2001-99a-19d-2900-147-4d20-ec3c-130.ngrok-free.app/api/";
@@ -15,7 +14,7 @@ const Mode = Object.freeze({
 const api = axios.create({
   baseURL: DEFAULT_BASE_URL,
   headers: {
-    'Authorization': `Bearer ${API_KEY}`,
+    'Authorization': `Bearer ${process.env.EXPO_PUBLIC_API_KEY}`,
     'Content-Type': 'application/json',
   },
   timeout: 3000,

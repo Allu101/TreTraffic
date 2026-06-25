@@ -13,7 +13,6 @@ import Map from './components/MapView';
 import { Mode, getAllTriggerLines, getAllIntersectionLocations, handleGoogleLogin,
   setBaseUrlOverride } from './utils/http-requests';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { GOOGLE_WEB_CLIENT_ID } from '@env';
 
 const BASE_URL_KEY = 'base_url';
 const INTERSECTION_BYPASS_DISTANCE = 33;
@@ -22,7 +21,7 @@ let positionStream = null;
 let reachedIntersection = -1;
 
 GoogleSignin.configure({
-  webClientId: GOOGLE_WEB_CLIENT_ID,
+  webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
 });
 
 export default function App() {

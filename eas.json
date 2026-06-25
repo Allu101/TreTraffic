@@ -13,9 +13,6 @@
     },
     "production": {
       "node": "20.20.0",
-        "android": {
-          "buildType": "apk"
-        },
       "autoIncrement": false
     }
   },
