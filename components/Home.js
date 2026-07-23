@@ -4,8 +4,8 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { getIntersectionData, getLightGroupsData } from '../utils/http-requests';
 import { Mode } from '../utils/http-requests';
 
-const iconSize = 55;
-const timerInterval = 650;
+const iconSize = 60;
+const timerInterval = 700;
 
 export default function Home({ currentMode, changeMode, selectedIntersection, selectedLightGroups,
     setSelectedIntersection, setSelectedLightGroups, startPositionStream, openBaseUrlDrawer }) {
@@ -101,13 +101,13 @@ export default function Home({ currentMode, changeMode, selectedIntersection, se
               return (
                 <View key={'light' + light.id} style={styles.light}>
                   {getColoredDirectionIcon(light.type, light.state)}
-                  <Text style={styles.text}>{light.state}</Text>
+                  {/*<Text style={styles.text}>{light.state}</Text>*/}
                   <Text style={styles.secondsText}>{light.currentTime}s/{light.estimatedChangeTime}s</Text>
                 </View>
               )
             })}
           </View>
-          <Text key={key}>{group.name}</Text>
+          <Text style={styles.streetName} key={key}>{group.name}</Text>
         </View>
       );
     }
@@ -150,7 +150,6 @@ export default function Home({ currentMode, changeMode, selectedIntersection, se
           name="menu"
           size={40}
           onPress={() => {
-            //console.log("menu icon pressed");
             openBaseUrlDrawer();
           }}
         />
@@ -160,7 +159,6 @@ export default function Home({ currentMode, changeMode, selectedIntersection, se
             name="car"
             size={40}
             onPress={() => {
-              //console.log("set mode to pedestrians");
               changeMode(Mode.Pedestrians);
             }}
           />
@@ -171,13 +169,12 @@ export default function Home({ currentMode, changeMode, selectedIntersection, se
             name="walk"
             size={40}
             onPress={() => {
-              //console.log("set mode to cars");
               changeMode(Mode.Cars);
             }}
           />
         )}
       </View>
-      <ScrollView style={{height: 300}} >
+      <ScrollView style={{height: 280}} >
         {showSelectedGroups()}
       </ScrollView>
     </>
@@ -207,15 +204,21 @@ const styles = StyleSheet.create({
     width: Dimensions.get('window').width * 0.33,
   },
   lights: {
-    marginBottom: 10,
+    marginBottom: 5,
+    marginTop: 10,
     flexDirection: 'row',
   },
   secondsText: {
-    fontSize: 23,
+    fontSize: 27,
     textAlign: 'center',
   },
   text: {
     fontSize: 15,
     textAlign: 'center',
-  }
+  },
+  streetName: {
+    fontSize: 16,
+    marginBottom: 5,
+    textAlign: 'center',
+  },
 });
