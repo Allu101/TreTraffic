@@ -5,6 +5,10 @@ const mode = Object.freeze({
   Pedestrians: 'Pedestrians',
 });
 
+const deleteValue = async (key) => {
+  await SecureStore.deleteItemAsync(key);
+}
+
 const getValue = async (key) => {
   const value = await SecureStore.getItemAsync(key);
   if (key === 'location') {
@@ -31,6 +35,7 @@ const save = async (key, value) => {
 
 export default {
   Mode: mode,
+  deleteValue,
   getValue,
   save,
 }

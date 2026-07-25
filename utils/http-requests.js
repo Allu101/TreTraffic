@@ -120,6 +120,15 @@ async function getLightGroupsData(lightGroups, currentMode) {
   }
 }
 
+async function getSubscriptionStatus(googleId) {
+  try {
+    const response = await api.post(`subscription/status`, { userId: googleId });
+    return response.data;
+  } catch (error) {
+    return handleApiError(error, "subscription status");
+  }
+}
+
 async function handleGoogleLogin(GoogleSignin) {
   try {
     await GoogleSignin.hasPlayServices();
@@ -133,8 +142,23 @@ async function handleGoogleLogin(GoogleSignin) {
     const response = await api.post('auth/google', { idToken });
 
     return response.data;
-  } catch (e) {
-    console.log(e);
+  } catch (error) {
+    //console.log(e);
+    return handleApiError(error, "google login");
+  }
+}
+
+async function verifySubscription(user, purchase) {
+  try {
+    const body = {
+      userId: user?.user?.id,
+      purchaseToken: purchase.purchaseToken,
+    }
+    const response = await api.post(`subscription/verify`, body);
+    return response.data;
+  } catch (error) {
+    console.log(error)
+    return handleApiError(error, "verify subscription");
   }
 }
 
@@ -144,6 +168,8 @@ export {
   getAllTriggerLines,
   getIntersectionData,
   getLightGroupsData,
+  getSubscriptionStatus,
   handleGoogleLogin,
   setBaseUrlOverride,
+  verifySubscription,
 };

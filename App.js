@@ -10,7 +10,8 @@ import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import AppStorage from './utils/secure-store';
 import Home from './components/Home';
 import Map from './components/MapView';
-import { Mode, getAllTriggerLines, getAllIntersectionLocations, handleGoogleLogin,
+import SubscriptionScreen from "./components/SubscriptionScreen";
+import { Mode, getAllTriggerLines, getAllIntersectionLocations, getSubscriptionStatus, handleGoogleLogin,
   setBaseUrlOverride } from './utils/http-requests';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -22,6 +23,7 @@ let reachedIntersection = -1;
 
 GoogleSignin.configure({
   webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+  offlineAccess: true,
 });
 
 export default function App() {
@@ -36,9 +38,11 @@ export default function App() {
 
   const [location, setLocation] = useState(null);
   const [googleUserInfo, setGoogleUserInfo] = useState(null);
+  const [subscription, setSubscription] = useState({ status: 'free'});
 
   useEffect(() => {
     const initAsync = async () => {
+      initSubscriptionStatus();
       const storedMode = await AppStorage.getValue('mode') || Mode.Cars;
       setCurrentMode(storedMode);
       await initBaseUrl();
@@ -54,16 +58,51 @@ export default function App() {
 
   useEffect(() => {
     fetchGPS();
-  }, [intersectionLocations, triggerLines, reachedIntersection])
+  }, [intersectionLocations, triggerLines, reachedIntersection]);
 
-  const googleSignOut = () => {
-    GoogleSignin.signOut()
-      .then(() => {
-        setGoogleUserInfo(null);
-      })
-      .catch((error) => {
-        console.log("Google sign-out error:", error);
-      });
+  const initSubscriptionStatus = async () => {
+    try {
+      // 1. Haetaan tila heti paikallisesta muistista, jotta Premium-näkymä aukeaa viiveettä
+      const cachedStatus = await AppStorage.getValue('user_subscription_status');
+      if (cachedStatus) setSubscription(cachedStatus);
+
+      // 2. Katsotaan onko Google-istunto valmiiksi voimassa taustalla
+      const isSignedIn = await GoogleSignin.hasPreviousSignIn();
+
+      if (isSignedIn) {
+        const userInfo = await GoogleSignin.signInSilently();
+        const googleId = userInfo.data?.user?.id;
+        const email = userInfo.data?.user?.email;
+        const name = userInfo.data?.user?.name;
+        const appUser = { user: { email, name, id: googleId }}
+
+        if (googleId) {
+          setGoogleUserInfo(appUser);
+          // 3. Synkronoidaan tilanne backendin ja Googlen kanssa taustalla
+          const subscriptionStatus = await getSubscriptionStatus(googleId);
+          if (subscriptionStatus.subscription_status) {
+            setSubscription({
+              ...subscription,
+              status: subscriptionStatus.subscription_status,
+              purchare_token: subscriptionStatus.purchare_token || ''
+            });
+            await AppStorage.save('user_subscription_status', subscriptionStatus.subscription_status);
+          }
+        }
+      }
+    } catch (err) {
+      console.log('Käynnistystarkistuksen taustavirhe:', err);
+    }
+  };
+
+  const googleSignOut = async () => {
+    setGoogleUserInfo(null);
+    await AppStorage.deleteValue('user_subscription_status');
+    await GoogleSignin.signOut();
+    setSubscription({
+      ...subscription,
+      status: 'free'
+    });
   }
 
   const initBaseUrl = async () => {
@@ -239,26 +278,9 @@ export default function App() {
           onPress={() => setIsBaseUrlDrawerVisible(false)}
         />
         <View style={styles.drawerContainer}>
-          <View style={styles.modeSelector}>
-            <MaterialCommunityIcons
-              color={'black'}
-              name="car"
-              size={40}
-              onPress={() => {
-                console.log("mode car pressed");
-                changeMode(Mode.Cars);
-              }}
-            />
-            <MaterialCommunityIcons
-              color={'black'}
-              name="walk"
-              size={40}
-              onPress={() => {
-                console.log("mode walk pressed");
-                changeMode(Mode.Pedestrians);
-              }}
-            />
-          </View>
+          <Text style={styles.subHeader}>
+            Tilaus: {subscription.status === 'active' ? '⭐ PREMIUM' : '📱 ILMAISVERSIO'}
+          </Text>
           <Text style={styles.drawerTitle}>Set API base_url (https://url:port/api/)</Text>
           <TextInput
             style={styles.baseUrlInput}
@@ -298,11 +320,22 @@ export default function App() {
             {googleUserInfo && (
               <>
                 <Text>Signed in as:</Text>
-                <Text>{googleUserInfo.user.name}</Text>
-                <Text>{googleUserInfo.user.email}</Text>
+                <Text>{googleUserInfo.user?.name}</Text>
+                <Text>{googleUserInfo.user?.email}</Text>
                 <TouchableOpacity style={{ marginTop: 10, padding: 10, backgroundColor: '#ECECEC', borderRadius: 8 }} onPress={googleSignOut}>
                   <Text>Sign out</Text>
                 </TouchableOpacity>
+                {subscription !== 'active' && (
+                  <SubscriptionScreen 
+                    user={googleUserInfo}
+                    subscription={subscription}
+                    setSubscription={setSubscription}
+                    onLoginRequired={handleGoogleLogin} 
+                    onSuccess={async () => {
+                      await AsyncStorage.setItem('user_subscription_status', 'active');
+                    }} 
+                  />
+                )}
               </>
             )}
           </View>
@@ -369,4 +402,5 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontWeight: '600',
   },
+  subHeader: { fontSize: 16, fontWeight: 'bold', marginBottom: 10 },
 });
