@@ -1,14 +1,21 @@
 import { StyleSheet, Text, View, ScrollView, Dimensions } from 'react-native';
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { getIntersectionData, getLightGroupsData } from '../utils/http-requests';
 import { Mode } from '../utils/http-requests';
+import { useTrafficStream } from './hooks/useTrafficStream';
+import { LightTimer } from '../utils/lightTimer';
 
 const iconSize = 60;
-const timerInterval = 700;
+const timerInterval = 650;
+
+const getSessionClientId = () => {
+  return 'client_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+};
 
 export default function Home({ currentMode, changeMode, selectedIntersection, selectedLightGroups,
     setSelectedIntersection, setSelectedLightGroups, startPositionStream, openBaseUrlDrawer }) {
+  
+  const clientId = useMemo(() => getSessionClientId(), []);
   
   const [intersectionsData, setIntersectionsData] = useState(null);
   const [lightGroupsData, setLightGroupsData] = useState(null);
@@ -16,78 +23,32 @@ export default function Home({ currentMode, changeMode, selectedIntersection, se
   const intersectionTimerRef = useRef(null);
   const lightGroupTimerRef = useRef(null);
 
-
-  const stopTimer = (ref) => {
-    clearInterval(ref.current);
-    ref.current = null;
-  };
-
-  const startTimer = (ref, fn) => {
-    stopTimer(ref);
-    ref.current = setInterval(fn, timerInterval);
-  };
- 
-  useEffect(() => {
-    if (selectedIntersection?.length > 0) {
-		  fetchIntersectionData();
-      startTimer(intersectionTimerRef, fetchIntersectionData);
-    }
-    if (selectedLightGroups?.length > 0) {
-      fetchLightGroupsData();
-      startTimer(lightGroupTimerRef, fetchLightGroupsData);
-    }
-		return () => {
-			stopTimer(intersectionTimerRef);
-      stopTimer(lightGroupTimerRef);
-		}
-	}, [currentMode]);
+  const streamPayload = useTrafficStream(clientId, selectedIntersection, selectedLightGroups, currentMode);
 
   useEffect(() => {
     if (selectedIntersection == null) return;
 
     if (!selectedIntersection.length) {
-      stopTimer(intersectionTimerRef); return;
+      return;
     }
 
     setSelectedLightGroups([]);
-    fetchIntersectionData();
-    startTimer(intersectionTimerRef, fetchIntersectionData);
-    startPositionStream();
   }, [selectedIntersection]);
 
   useEffect(() => {
     if (selectedLightGroups == null) return;
 
     if (!selectedLightGroups.length) {
-      stopTimer(lightGroupTimerRef); return;
+      return;
     }
 
     setSelectedIntersection([]);
-    fetchLightGroupsData();
-    startTimer(lightGroupTimerRef, fetchLightGroupsData);
-    startPositionStream();
   }, [selectedLightGroups]);
 
-  const applyFetchResult = (data, statusCode, setData, clearSelection) => {
-    if (data?.error || statusCode === 304) return;
-    if (!data?.length) { clearSelection([]); return; }
-    setData(data);
-  };
-
-  const fetchIntersectionData = async () => {
-    let [data, statusCode] = await getIntersectionData(selectedIntersection, currentMode);
-    applyFetchResult(data, statusCode, setIntersectionsData, setSelectedIntersection);
-  }
-
-  const fetchLightGroupsData = async () => {
-    let [data, statusCode] = await getLightGroupsData(selectedLightGroups, currentMode);
-    applyFetchResult(data, statusCode, setLightGroupsData, setSelectedLightGroups);
-  }
-
   const showSelectedGroups = () => {
-    const selectedData = getSelectedData();
+    const selectedData = streamPayload?.data || null;
 
-    if (selectedData == null || selectedData.length == 0) {
+    if (selectedData == null ||Object.keys(selectedData).length == 0) {
       return <Text style={[styles.containerRow, styles.text]}>-</Text>;
     }
 
@@ -101,26 +62,28 @@ export default function Home({ currentMode, changeMode, selectedIntersection, se
               return (
                 <View key={'light' + light.id} style={styles.light}>
                   {getColoredDirectionIcon(light.type, light.state)}
-                  {/*<Text style={styles.text}>{light.state}</Text>*/}
-                  <Text style={styles.secondsText}>{light.currentTime}s/{light.estimatedChangeTime}s</Text>
+                  <Text style={styles.text}>{light.state}</Text>
+                  {/*<Text style={styles.secondsText}>{light.currentTime}s/{light.estimatedChangeTime}s</Text>*/}
+                  <LightTimer
+                    serverTime={streamPayload?.serverTime}
+                    currentTime={light.currentTime}
+                    estimatedChangeTime={light.estimatedChangeTime}
+                    styles={styles}
+                  />
                 </View>
               )
             })}
           </View>
-          <Text style={styles.streetName} key={key}>{group.name}</Text>
+          {selectedIntersection?.length > 0 && (
+            <Text style={styles.streetName} key={key + 'i'}>{group.name}</Text>
+          )}
+          {selectedLightGroups?.length > 0 && (
+            <Text style={styles.streetName} key={key + 'g'}>{group.displayName}</Text>
+          )}
         </View>
       );
     }
     return result;
-  }
-
-  const getSelectedData = () => {
-    if (selectedIntersection?.length > 0) {
-      return intersectionsData;
-    } else if (selectedLightGroups?.length > 0) {
-      return lightGroupsData;
-    }
-    return null;
   }
 
   const TYPE_ICON = { '0': 'walk', '1': 'arrow-left-circle', '2': 'arrow-up-circle', '3': 'arrow-right-circle' };

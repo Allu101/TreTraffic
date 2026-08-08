@@ -1,7 +1,8 @@
 import axios from "axios";
 
 const DEFAULT_BASE_URL = "http://192.168.0.3:5000/api/";
-//const DEFAULT_BASE_URL = "https://1b4b-2001-99a-19d-2900-147-4d20-ec3c-130.ngrok-free.app/api/";
+//const DEFAULT_BASE_URL = "https://aba9-2001-99a-19d-2900-a48f-19d1-82f3-2249.ngrok-free.app/api/";
+let baseUrlOverride = null;
 
 const etagCache = new Map();
 const dataCache = new Map();
@@ -21,7 +22,12 @@ const api = axios.create({
 });
 
 function setBaseUrlOverride(baseUrl) {
+  baseUrlOverride = baseUrl || DEFAULT_BASE_URL;
   api.defaults.baseURL = baseUrl || DEFAULT_BASE_URL;
+}
+
+function getBaseUrl() {
+  return baseUrlOverride || DEFAULT_BASE_URL;
 }
 
 function handleApiError(error, name) {
@@ -50,73 +56,6 @@ async function getAllTriggerLines(currentMode) {
     return response.data || [];
   } catch (error) {
     return handleApiError(error, "triggerlines");
-  }
-}
-
-async function getIntersectionData(intersection_nro, currentMode) {
-  const key = `intersection-${intersection_nro}-${currentMode}`;
-  const etag = etagCache.get(key);
-
-  try {
-    //const time = Date.now();
-
-    const response = await api.get(
-      `intersections/intersection/${intersection_nro}?mode=${currentMode}`,
-      {
-        headers: etag ? { 'If-None-Match': etag } : {},
-        validateStatus: (status) => status === 200 || status === 304,
-      }
-    );
-
-    //console.log(Date.now() - time + ' ms ' + response.status + ": " + response.headers['content-length']);
-
-    if (response.status === 304) {
-      return [dataCache.get(key), response.status];
-    }
-
-    const newEtag = response.headers.etag;
-    if (newEtag) {
-      etagCache.set(key, newEtag);
-    }
-
-    dataCache.set(key, response.data);
-
-    return [response.data || {}, response.status];
-  } catch (error) {
-    return handleApiError(error, "intersection data");
-  }
-}
-
-async function getLightGroupsData(lightGroups, currentMode) {
-  const key = `lightgroups-${lightGroups}-${currentMode}`;
-  const etag = etagCache.get(key);
-
-  try {
-    //const time = Date.now();
-
-    const response = await api.get(
-      `intersections/lightgroups/${lightGroups}?mode=${currentMode}`,
-      {
-        headers: etag ? { 'If-None-Match': etag } : {},
-        validateStatus: (status) => status === 200 || status === 304,
-      }
-    );
-    //console.log(Date.now() - time + ' ms l' + response.status);
-
-    if (response.status === 304) {
-      return [dataCache.get(key), response.status];
-    }
-
-    const newEtag = response.headers.etag;
-    if (newEtag) {
-      etagCache.set(key, newEtag);
-    }
-
-    dataCache.set(key, response.data);
-
-    return [response.data || {}, response.status];
-  } catch (error) {
-    return handleApiError(error, "lightgroups data");
   }
 }
 
@@ -162,14 +101,29 @@ async function verifySubscription(user, purchase) {
   }
 }
 
+async function updateStream(clientId, type, params, currentMode) {
+  try {
+    const body = {
+      clientId,
+      mode: currentMode,
+      type,
+      params
+    }
+    const response = await api.post(`intersections/updatestream`, body);
+    return response.data;
+  } catch (error) {
+    return handleApiError(error, "update stream");
+  }
+}
+
 export {
   Mode,
+  getBaseUrl,
 	getAllIntersectionLocations,
   getAllTriggerLines,
-  getIntersectionData,
-  getLightGroupsData,
   getSubscriptionStatus,
   handleGoogleLogin,
   setBaseUrlOverride,
   verifySubscription,
+  updateStream
 };
