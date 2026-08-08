@@ -204,7 +204,7 @@ export default function App() {
         }
 
         if (intersectionLocations.length > 0) {
-          const filteredIntersection = intersectionLocations.filter((i) => i.hasLightGroups?.length > 0);
+          const filteredIntersection = intersectionLocations.filter((i) => i.supportLevel >= 3 && i.supportedGroups.includes(currentMode));
 
           const targetIntersection = selectedIntersection.length > 0 ? selectedIntersection : selectedLightGroups?.[0]?.split(':')[0];
           if (!targetIntersection) return;
